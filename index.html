@@ -123,6 +123,13 @@ button{font-family:inherit;cursor:pointer}
 @media (max-width:760px){.grid2{grid-template-columns:1fr}}
 .fld label{display:block;font-size:16px;font-weight:700;color:var(--ink);margin:0 0 7px}
 .fld .opt{font-weight:400;color:var(--text)}
+.fld .help{font-size:15px;color:var(--text);margin:8px 0 0}
+.btn-cam{min-height:50px;padding:0 20px;font-size:17px;gap:10px;margin-top:10px}
+.btn-cam svg{width:24px;height:24px;flex:none}
+.eid-shot{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:10px}
+.eid-shot img{width:104px;height:66px;object-fit:cover;border-radius:10px;border:2px solid var(--sky-lt);background:var(--ice)}
+.eid-ok{font-size:16px;font-weight:700;color:var(--ink)}
+.link-btn{background:none;border:0;padding:10px 4px;font:inherit;font-size:16px;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .inp{width:100%;height:60px;border-radius:14px;border:2px solid var(--sky-lt);background:var(--white);padding:0 18px;font-size:20px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:var(--mid);box-shadow:0 0 0 4px rgba(113,181,226,.28)}
 .inp[aria-invalid=true]{border-color:var(--ink)}
@@ -277,9 +284,18 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
             <input class="inp ltr" id="fMobile" type="tel" inputmode="tel" autocomplete="off" placeholder="+971 50 123 4567" enterkeyhint="next">
             <div class="err" id="errMobile"></div>
           </div>
-          <div class="fld">
-            <label for="fEid"><span data-t="fEid"></span> <span class="opt" data-t="optional"></span></label>
+          <div class="fld" id="fldEid">
+            <label for="fEid"><span data-t="fEid"></span> <span class="opt" id="eidOpt" data-t="optional" hidden></span></label>
             <input class="inp ltr" id="fEid" type="text" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="18" placeholder="784-XXXX-XXXXXXX-X" enterkeyhint="next">
+            <p class="help" data-t="eidHelp"></p>
+            <button type="button" class="btn btn-secondary btn-cam" id="eidCamBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#021A91" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.2" r="3.4"/></svg><span data-t="eidPhotoBtn"></span></button>
+            <div class="eid-shot" id="eidPhotoBox" hidden>
+              <img id="eidThumb" alt="">
+              <span class="eid-ok" data-t="eidPhotoDone"></span>
+              <button type="button" class="link-btn" id="eidRetake" data-t="eidRetake"></button>
+              <button type="button" class="link-btn" id="eidRemove" data-t="eidRemove"></button>
+            </div>
+            <input type="file" id="eidFile" accept="image/*" capture="environment" hidden tabindex="-1" aria-hidden="true">
             <div class="err" id="errEid"></div>
           </div>
           <div class="fld">
@@ -287,9 +303,14 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
             <input class="inp ltr" id="fEmail" type="email" inputmode="email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
             <div class="err" id="errEmail"></div>
           </div>
-          <div class="fld" style="grid-column:1/-1">
+          <div class="fld" id="fldCompany" style="grid-column:1/-1">
             <label for="fCompany"><span data-t="fCompany"></span> <span class="opt" data-t="optional"></span></label>
-            <input class="inp" id="fCompany" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="done">
+            <input class="inp" id="fCompany" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="next">
+          </div>
+          <div class="fld" id="fldLicense" hidden>
+            <label for="fLicense" data-t="fLicense"></label>
+            <input class="inp ltr" id="fLicense" type="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" maxlength="40" enterkeyhint="done">
+            <div class="err" id="errLicense"></div>
           </div>
         </div>
       </div>
@@ -456,8 +477,8 @@ var T = {
     switchLang:'العربية', startAgain:'Start again',
     formTitle:'Visitor sign-in.', formLead:'It takes about one minute. When you finish, please take a seat.',
     secReason:'Reason for your visit', secDetails:'Your details', secHost:'Who you are visiting', secPrivacy:'Privacy',
-    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)',
-    privacyText:'We keep this record to manage safety and security at our premises. It is stored securely and only authorised staff can see it. We do not share it or use it for marketing. To see or correct your record, please ask at reception.',
+    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
+    privacyText:'We keep this record to manage safety and security at our premises. It is stored securely and only authorised staff can see it. We do not share it or use it for marketing. If you add a photo of your Emirates ID, it is kept with this record. To see or correct your record, please ask at reception.',
     consentText:'I agree that Bioscript Center may keep this record for this purpose.',
     signIn:'Sign in',
     eType:'Please choose the reason for your visit.', eName:'Please enter your full name.', eMobile:'Please enter a valid mobile number.',
@@ -475,8 +496,8 @@ var T = {
     switchLang:'English', startAgain:'البدء من جديد',
     formTitle:'تسجيل دخول الزوار.', formLead:'يستغرق ذلك دقيقة تقريبًا. بعد الانتهاء، تفضّل بالجلوس.',
     secReason:'سبب الزيارة', secDetails:'بياناتك', secHost:'الجهة التي تزورها', secPrivacy:'الخصوصية',
-    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)',
-    privacyText:'نحتفظ بهذا السجل لإدارة السلامة والأمن في مقرّنا. يُحفظ السجل بشكل آمن، ولا يطّلع عليه إلا الموظفون المخوّلون. لا نشاركه مع أي جهة ولا نستخدمه لأغراض تسويقية. للاطلاع على سجلك أو تصحيحه، يُرجى مراجعة الاستقبال.',
+    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
+    privacyText:'نحتفظ بهذا السجل لإدارة السلامة والأمن في مقرّنا. يُحفظ السجل بشكل آمن، ولا يطّلع عليه إلا الموظفون المخوّلون. لا نشاركه مع أي جهة ولا نستخدمه لأغراض تسويقية. إذا أضفت صورة لبطاقة الهوية الإماراتية، فستُحفظ مع هذا السجل. للاطلاع على سجلك أو تصحيحه، يُرجى مراجعة الاستقبال.',
     consentText:'أوافق على احتفاظ مركز بايوسكريبت بهذا السجل لهذا الغرض.',
     signIn:'تسجيل الدخول',
     eType:'يُرجى اختيار سبب الزيارة.', eName:'يُرجى إدخال اسمك الكامل.', eMobile:'يُرجى إدخال رقم هاتف متحرك صحيح.',
@@ -843,6 +864,87 @@ var lang = 'en';
 var state = {};
 function resetState(){ state = {type:null, host:null}; }
 
+/* ---------------- ID rules by reason for visit ---------------- */
+var EID_REQ = {meeting:1, contractor:1, interview:1, supplier:1, other:1};   // Emirates ID number or photo needed
+var LIC_REQ = {contractor:1, supplier:1, other:1};                          // trade license number needed
+function eidNeeded(){ return !!(state && state.type && EID_REQ[state.type]); }
+function licNeeded(){ return !!(state && state.type && LIC_REQ[state.type]); }
+function licClean(v){ return String(v || '').replace(/\s+/g, ' ').trim().toUpperCase(); }
+function licOk(v){ return v.length >= 2 && /^[A-Z0-9][A-Z0-9 .\/\-]*$/.test(v); }
+function updateTypeFields(){
+  var eReq = eidNeeded(), lReq = licNeeded();
+  $('#eidOpt').hidden = !state.type || eReq;
+  $('#fldLicense').hidden = !lReq;
+  $('#fldCompany').style.gridColumn = lReq ? '' : '1/-1';
+  if (!eReq && $('#errEid').getAttribute('data-k') === 'eEidNeed'){ setErr($('#errEid'), null); $('#fEid').removeAttribute('aria-invalid'); }
+  if (!lReq){ setErr($('#errLicense'), null); $('#fLicense').removeAttribute('aria-invalid'); }
+}
+
+/* ---------------- Emirates ID photo (kept on this iPad only) ---------------- */
+var eidPhoto = null;
+function setEidPhoto(p){
+  if (eidPhoto && eidPhoto.url){ try { URL.revokeObjectURL(eidPhoto.url); } catch(e){} }
+  eidPhoto = p || null;
+  $('#eidPhotoBox').hidden = !eidPhoto; $('#eidCamBtn').hidden = !!eidPhoto;
+  if (eidPhoto) $('#eidThumb').src = eidPhoto.url; else $('#eidThumb').removeAttribute('src');
+  if (typeof updateProgress === 'function' && formBand) updateProgress();
+}
+function shrinkPhoto(file){
+  return new Promise(function(res, rej){
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function(){
+      var w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, 1600 / Math.max(w, h));
+      var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(w * k)); cv.height = Math.max(1, Math.round(h * k));
+      var ctx = cv.getContext('2d'); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      try { URL.revokeObjectURL(url); } catch(e){}
+      toJpeg(cv, .82).then(function(u){ cv.width = cv.height = 0; res(u); }, rej);
+    };
+    img.onerror = function(){ try { URL.revokeObjectURL(url); } catch(e){} rej(new Error('image')); };
+    img.src = url;
+  });
+}
+var photoDb = (function(){
+  var p = null;
+  function open(){
+    if (p) return p;
+    p = new Promise(function(res, rej){
+      try {
+        var r = indexedDB.open('bsv-photos', 1);
+        r.onupgradeneeded = function(){ r.result.createObjectStore('photos'); };
+        r.onsuccess = function(){ res(r.result); };
+        r.onerror = function(){ rej(r.error); };
+      } catch(e){ rej(e); }
+    });
+    p.catch(function(){ p = null; });
+    return p;
+  }
+  function tx(mode, fn){
+    return open().then(function(db){ return new Promise(function(res, rej){
+      var t = db.transaction('photos', mode), req = fn(t.objectStore('photos'));
+      t.oncomplete = function(){ res(req && req.result); };
+      t.onerror = t.onabort = function(){ rej(t.error); };
+    }); });
+  }
+  return {
+    put: function(id, u){ return tx('readwrite', function(s){ return s.put(u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength), id); }); },
+    get: function(id){ return tx('readonly', function(s){ return s.get(id); }).then(function(b){ return b ? new Uint8Array(b) : null; }); },
+    del: function(id){ return tx('readwrite', function(s){ return s.delete(id); }); },
+    clear: function(){ return tx('readwrite', function(s){ return s.clear(); }); }
+  };
+})();
+function pickPhoto(){ var f = $('#eidFile'); f.value = ''; f.click(); }
+$('#eidCamBtn').addEventListener('click', pickPhoto);
+$('#eidRetake').addEventListener('click', pickPhoto);
+$('#eidRemove').addEventListener('click', function(){ setEidPhoto(null); });
+$('#eidFile').addEventListener('change', function(){
+  var f = this.files && this.files[0]; if (!f) return;
+  armIdle();
+  shrinkPhoto(f).then(function(bytes){
+    setEidPhoto({bytes: bytes, url: URL.createObjectURL(new Blob([bytes], {type: 'image/jpeg'}))});
+    setErr($('#errEid'), null); $('#fEid').removeAttribute('aria-invalid');
+  }, function(){ setErr($('#errEid'), T[lang].ePhoto, 'ePhoto'); });
+});
+
 function applyLang(){
   var L = T[lang];
   ['form','thanks'].forEach(function(id){ var s = $('#'+id); s.setAttribute('lang', lang); s.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr'); });
@@ -876,8 +978,8 @@ function setErr(el, msg, key){
 function startForm(l){
   lang = l || 'en';
   resetState();
-  $('#visitForm').reset();
-  ['#fName','#fMobile','#fEid','#fEmail'].forEach(function(s){ $(s).removeAttribute('aria-invalid'); });
+  $('#visitForm').reset(); setEidPhoto(null); updateTypeFields();
+  ['#fName','#fMobile','#fEid','#fEmail','#fLicense'].forEach(function(s){ $(s).removeAttribute('aria-invalid'); });
   $$('#form .err').forEach(function(e){ setErr(e, null); });
   applyLang();
   show('form');
@@ -899,7 +1001,10 @@ function progressValue(){
   if (emailOk($('#fEmail').value.trim())) n++;
   if (state.host != null) n++;
   if ($('#fConsent').checked) n++;
-  return n / 6;
+  var total = 6;
+  if (eidNeeded()){ total++; var ev = $('#fEid').value; if (eidPhoto || (eidDigits(ev) && eidOk(ev))) n++; }
+  if (licNeeded()){ total++; if (licOk(licClean($('#fLicense').value))) n++; }
+  return n / total;
 }
 function updateProgress(){ var p = progressValue(); if (Math.abs(p - formBand.progress) > .001) formBand.setProgress(p); }
 
@@ -907,7 +1012,7 @@ $('#typeChips').addEventListener('click', function(e){
   var b = e.target.closest('.chip'); if (!b) return;
   state.type = b.getAttribute('data-type');
   $$('.chip', this).forEach(function(c){ c.setAttribute('aria-pressed', c === b); });
-  setErr($('#errType'), null); updateProgress();
+  setErr($('#errType'), null); updateTypeFields(); updateProgress();
 });
 $('#hostChips').addEventListener('click', function(e){
   var b = e.target.closest('.chip'); if (!b) return;
@@ -915,7 +1020,7 @@ $('#hostChips').addEventListener('click', function(e){
   $$('.chip', this).forEach(function(c){ c.setAttribute('aria-pressed', c === b); });
   setErr($('#errHost'), null); updateProgress();
 });
-['#fName','#fMobile','#fEid','#fEmail','#fCompany'].forEach(function(s){
+['#fName','#fMobile','#fEid','#fEmail','#fCompany','#fLicense'].forEach(function(s){
   $(s).addEventListener('input', function(){ this.removeAttribute('aria-invalid'); var e = this.parentNode.querySelector('.err'); if (e) setErr(e, null); updateProgress(); });
 });
 $('#fConsent').addEventListener('change', function(){ setErr($('#errConsent'), null); updateProgress(); });
@@ -924,7 +1029,8 @@ $('#fMobile').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e
 $('#fEid').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fEmail').focus(); } });
 $('#fEid').addEventListener('input', function(){ var f = eidFormat(this.value); if (f !== this.value) this.value = f; });
 $('#fEmail').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fCompany').focus(); } });
-$('#fCompany').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); this.blur(); } });
+$('#fCompany').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); if (!$('#fldLicense').hidden) $('#fLicense').focus(); else this.blur(); } });
+$('#fLicense').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); this.blur(); } });
 
 $('#langBtn').addEventListener('click', function(){
   lang = lang === 'en' ? 'ar' : 'en';
@@ -936,9 +1042,10 @@ $('#cancelBtn').addEventListener('click', function(){ goWelcome(); });
 
 $('#visitForm').addEventListener('submit', function(e){
   e.preventDefault();
+  if (busy) return;
   var L = T[lang], first = null;
   var name = $('#fName').value.replace(/\s+/g,' ').trim(), mobile = $('#fMobile').value.trim(),
-      eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim();
+      eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim(), license = licNeeded() ? licClean($('#fLicense').value) : '';
   function bad(inputSel, errSel, key){
     setErr($(errSel), L[key], key);
     if (inputSel) $(inputSel).setAttribute('aria-invalid', 'true');
@@ -948,7 +1055,9 @@ $('#visitForm').addEventListener('submit', function(e){
   if (name.length < 2) bad('#fName', '#errName', 'eName');
   if (!mobileOk(mobile)) bad('#fMobile', '#errMobile', 'eMobile');
   if (!eidOk(eid)) bad('#fEid', '#errEid', 'eEid');
+  if (eidOk(eid) && eidNeeded() && !eidDigits(eid) && !eidPhoto) bad('#fEid', '#errEid', 'eEidNeed');
   if (!emailOk(email)) bad('#fEmail', '#errEmail', 'eEmail');
+  if (licNeeded() && !licOk(license)) bad('#fLicense', '#errLicense', 'eLicense');
   if (state.host == null) bad(null, '#errHost', 'eHost');
   if (!$('#fConsent').checked) bad(null, '#errConsent', 'eConsent');
   if (first){
@@ -961,20 +1070,29 @@ $('#visitForm').addEventListener('submit', function(e){
   var rec = {
     id: now.getTime().toString(36) + Math.random().toString(36).slice(2,6),
     ref: pad(now.getMonth()+1) + pad(now.getDate()) + '-' + Math.random().toString(36).slice(2,6).toUpperCase(),
-    ts: now.toISOString(), type: state.type, name: name, mobile: mobile, eid: eid, email: email, company: company,
+    ts: now.toISOString(), type: state.type, name: name, mobile: mobile, eid: eid, email: email, company: company, license: license, eidPhoto: !!eidPhoto,
     host: host.en, hostAr: host.ar || '', lang: lang, consent: true, device: settings.ipadName
   };
+  busy = true; $('#submitBtn').disabled = true;
+  (eidPhoto ? photoDb.put(rec.id, eidPhoto.bytes) : Promise.resolve()).then(function(){
   records.push(rec);
   if (!store.set('bsv.records', records)){
-    records.pop();
+    records.pop(); if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){});
     setErr($('#errConsent'), L.eSave, 'eSave');
     return;
   }
+  setEidPhoto(null);
   document.activeElement && document.activeElement.blur && document.activeElement.blur();
   showThanks(rec);
+  }, function(){
+    rec.eidPhoto = false; setEidPhoto(null);
+    setErr($('#errEid'), L.ePhotoSave, 'ePhotoSave'); $('#fEid').setAttribute('aria-invalid', 'true');
+    $('#fldEid').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
+  }).then(function(){ busy = false; $('#submitBtn').disabled = false; });
 });
 
 /* ---------------- thank you ---------------- */
+var busy = false;
 var thanksTimer = null, thanksLeft = 0, lastRec = null;
 function showThanks(rec){
   lastRec = rec;
@@ -1129,7 +1247,7 @@ function filtered(){
   var from = periodStart(), q = query.toLowerCase();
   return records.filter(function(r){
     if (from && new Date(r.ts) < from) return false;
-    if (q && (r.name + ' ' + r.mobile + ' ' + (r.eid || '') + ' ' + r.company + ' ' + r.email + ' ' + r.ref).toLowerCase().indexOf(q) < 0) return false;
+    if (q && (r.name + ' ' + r.mobile + ' ' + (r.eid || '') + ' ' + r.company + ' ' + (r.license || '') + ' ' + r.email + ' ' + r.ref).toLowerCase().indexOf(q) < 0) return false;
     return true;
   }).sort(function(a, b){ return a.ts < b.ts ? 1 : -1; });
 }
@@ -1160,8 +1278,8 @@ function renderStaff(){
     list.map(function(r){
       var d = new Date(r.ts);
       return '<tr><td class="nw"><div>' + fDate(d) + '</div><div class="s">' + fTime(d) + '</div></td>' +
-        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + '</td>' +
-        '<td class="nw" dir="ltr">' + esc(r.mobile) + '</td><td class="hide-sm">' + esc(r.company || '–') + '</td>' +
+        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + '</td>' +
+        '<td class="nw" dir="ltr">' + esc(r.mobile) + '</td><td class="hide-sm">' + esc(r.company || '–') + (r.license ? '<div class="s">Trade license ' + esc(r.license) + '</div>' : '') + '</td>' +
         '<td>' + esc(typeLabel(r.type)) + '</td><td class="hide-sm">' + esc(r.host) + '</td>' +
         '<td><button class="btn btn-secondary pdf" data-id="' + esc(r.id) + '">PDF</button></td></tr>';
     }).join('') + '</tbody></table>';
@@ -1180,7 +1298,7 @@ $('#deleteAll').addEventListener('click', function(){
   $('#confirmModal').classList.add('show');
 });
 $('#confirmNo').addEventListener('click', function(){ $('#confirmModal').classList.remove('show'); });
-$('#confirmYes').addEventListener('click', function(){ records = []; store.set('bsv.records', records); $('#confirmModal').classList.remove('show'); renderStaff(); });
+$('#confirmYes').addEventListener('click', function(){ records = []; store.set('bsv.records', records); photoDb.clear().catch(function(){}); $('#confirmModal').classList.remove('show'); renderStaff(); });
 $('#sList').addEventListener('click', function(e){
   var b = e.target.closest('.pdf'); if (!b) return;
   var r = records.filter(function(x){ return x.id === b.getAttribute('data-id'); })[0]; if (!r) return;
@@ -1276,12 +1394,12 @@ function savedOk(){ settings[saveKind === 'xlsx' ? 'lastXlsx' : 'lastPdf'] = new
 var PK = 2.5; // canvas pixels per PDF point
 var PDF_FONT = canvasFamily(getComputedStyle(document.body).fontFamily);
 function loadImg(src){ return new Promise(function(res, rej){ var i = new Image(); i.onload = function(){ res(i); }; i.onerror = rej; i.src = src; }); }
-function toJpeg(cv){
+function toJpeg(cv, q){
   return new Promise(function(res){
     if (cv.toBlob) cv.toBlob(function(b){
       var fr = new FileReader(); fr.onload = function(){ res(new Uint8Array(fr.result)); }; fr.readAsArrayBuffer(b);
-    }, 'image/jpeg', .9);
-    else { var s = atob(cv.toDataURL('image/jpeg', .9).split(',')[1]), u = new Uint8Array(s.length); for (var i=0;i<s.length;i++) u[i] = s.charCodeAt(i); res(u); }
+    }, 'image/jpeg', q || .9);
+    else { var s = atob(cv.toDataURL('image/jpeg', q || .9).split(',')[1]), u = new Uint8Array(s.length); for (var i=0;i<s.length;i++) u[i] = s.charCodeAt(i); res(u); }
   });
 }
 function page(cv, W, H){ var ctx = cv.getContext('2d'); cv.width = Math.round(W*PK); cv.height = Math.round(H*PK); ctx.setTransform(PK,0,0,PK,0,0); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,W,H); ctx.textBaseline = 'alphabetic'; return ctx; }
@@ -1338,7 +1456,7 @@ function makeLogPdf(list, period){
         y += 22;
         rows.forEach(function(r){
           var d = new Date(r.ts), x = 36, cells = [
-            [fDate(d), fTime(d)], [r.name, r.email], [r.mobile, ''], [r.company || '–', ''],
+            [fDate(d), fTime(d)], [r.name, r.email], [r.mobile, ''], [r.company || '–', r.license ? 'License ' + r.license : ''],
             [typeLabel(r.type), ''], [r.host, ''], [r.ref, '']
           ];
           cells.forEach(function(c, ci){
@@ -1356,9 +1474,30 @@ function makeLogPdf(list, period){
     return chain.then(function(){ var px = [cv.width, cv.height]; cv.width = cv.height = 0; return buildPdf(out, px[0], px[1], W, H, 'Visitor log - ' + settings.ipadName); });
   });
 }
+function loadIdPhoto(r){
+  if (!r || !r.eidPhoto) return Promise.resolve(null);
+  return photoDb.get(r.id).then(function(b){
+    if (!b) return null;
+    var url = URL.createObjectURL(new Blob([b], {type: 'image/jpeg'}));
+    return loadImg(url).then(function(img){ return img; }, function(){ return null; }).then(function(img){ setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){} }, 2000); return img; });
+  }).catch(function(){ return null; });
+}
+function idPage(cv, W, H, r, logo, photo){
+  if (!photo) return Promise.resolve(null);
+  var ctx = page(cv, W, H);
+  header(ctx, logo, W);
+  title(ctx, 'Emirates ID photo', 36, 124, 24);
+  txt(ctx, r.name + '   ·   Reference ' + r.ref + '   ·   ' + fDate(new Date(r.ts)), 36, 144, {size:10.5, max: W - 72});
+  var maxW = W - 72, maxH = H - 172 - 100, k = Math.min(maxW / photo.naturalWidth, maxH / photo.naturalHeight);
+  var w = photo.naturalWidth * k, h = photo.naturalHeight * k;
+  ctx.drawImage(photo, 36, 172, w, h);
+  ctx.strokeStyle = '#B9DAF1'; ctx.lineWidth = .8; ctx.strokeRect(36, 172, w, h);
+  footer(ctx, W, H, 2, 2);
+  return toJpeg(cv);
+}
 function makeRecordPdf(r){
   var W = 595, H = 842, cv = document.createElement('canvas'), d = new Date(r.ts);
-  return loadImg(LOGO_SRC).then(function(logo){
+  return Promise.all([loadImg(LOGO_SRC), loadIdPhoto(r)]).then(function(a){ var logo = a[0], photo = a[1];
     var ctx = page(cv, W, H);
     header(ctx, logo, W);
     title(ctx, 'Visitor record', 36, 124, 24);
@@ -1366,8 +1505,8 @@ function makeRecordPdf(r){
     var fields = [
       ['Date', fDate(d)], ['Time signed in', fTime(d)],
       ['Full name', r.name], ['Mobile number', r.mobile],
-      ['Emirates ID', r.eid || '–'],
-      ['Email', r.email || '–'], ['Company or organisation', r.company || '–'],
+      ['Emirates ID', r.eid || (r.eidPhoto ? 'Photo on page 2' : '–')],
+      ['Email', r.email || '–'], ['Company or organisation', r.company || '–'], ['Trade license', r.license || '–'],
       ['Reason for visit', typeLabel(r.type)], ['Visiting', r.host],
       ['Form language', r.lang === 'ar' ? 'Arabic' : 'English'], ['iPad', r.device || settings.ipadName]
     ];
@@ -1398,8 +1537,8 @@ function makeRecordPdf(r){
       txt(ctx, T.ar.consentText, W - 52, ly + 49, {size:10, align:'right'});
       ctx.restore();
     }
-    footer(ctx, W, H, 1, 1);
-    return toJpeg(cv).then(function(j){ var px = [cv.width, cv.height]; cv.width = cv.height = 0; return buildPdf([j], px[0], px[1], W, H, 'Visitor record ' + r.ref); });
+    footer(ctx, W, H, 1, photo ? 2 : 1);
+    return toJpeg(cv).then(function(j){ return idPage(cv, W, H, r, logo, photo).then(function(j2){ var px = [cv.width, cv.height]; cv.width = cv.height = 0; return buildPdf(j2 ? [j, j2] : [j], px[0], px[1], W, H, 'Visitor record ' + r.ref); }); });
   });
 }
 function buildPdf(jpegs, pxW, pxH, W, H, titleText){
@@ -1482,8 +1621,8 @@ function xe(s){
 function makeXlsx(list, period){
   var now = new Date(), HEAD = 9, FIRST = HEAD + 1;
   var cols = [
-    {h:'Date', w:14}, {h:'Time', w:9}, {h:'Full name', w:26}, {h:'Mobile number', w:18}, {h:'Emirates ID', w:21},
-    {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Reason for visit', w:23}, {h:'Visiting', w:26},
+    {h:'Date', w:14}, {h:'Time', w:9}, {h:'Full name', w:26}, {h:'Mobile number', w:18}, {h:'Emirates ID', w:21}, {h:'ID photo', w:16},
+    {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Trade license', w:18}, {h:'Reason for visit', w:23}, {h:'Visiting', w:26},
     {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'Reference', w:13}
   ];
   function cn(i){ return String.fromCharCode(65 + i); }
@@ -1502,21 +1641,12 @@ function makeXlsx(list, period){
   rows.push('<row r="' + HEAD + '" ht="28" customHeight="1">' + cols.map(function(c, ci){ return str(cn(ci) + HEAD, c.h.toUpperCase(), 4); }).join('') + '</row>');
   list.forEach(function(r, ri){
     var d = new Date(r.ts), n = FIRST + ri;
-    rows.push('<row r="' + n + '" ht="24" customHeight="1">' + [
-      num('A' + n, serial(d), 6),
-      num('B' + n, (d.getHours() * 60 + d.getMinutes()) / 1440, 8),
-      str('C' + n, r.name, 7),
-      str('D' + n, r.mobile, 5),
-      str('E' + n, r.eid, 5),
-      str('F' + n, r.email, 5),
-      str('G' + n, r.company, 5),
-      str('H' + n, typeLabel(r.type), 5),
-      str('I' + n, r.host, 5),
-      str('J' + n, r.lang === 'ar' ? 'Arabic' : 'English', 5),
-      str('K' + n, r.device || settings.ipadName, 5),
-      str('L' + n, r.consent === false ? 'No' : 'Yes', 5),
-      str('M' + n, r.ref, 5)
-    ].join('') + '</row>');
+    var cells = [
+      [serial(d), 6, 1], [(d.getHours() * 60 + d.getMinutes()) / 1440, 8, 1], [r.name, 7], [r.mobile, 5], [r.eid, 5],
+      [r.eidPhoto ? 'Yes (in visitor PDF)' : 'No', 5], [r.email, 5], [r.company, 5], [r.license, 5], [typeLabel(r.type), 5], [r.host, 5],
+      [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.ref, 5]
+    ];
+    rows.push('<row r="' + n + '" ht="24" customHeight="1">' + cells.map(function(c, ci){ return c[2] ? num(cn(ci) + n, c[0], c[1]) : str(cn(ci) + n, c[0], c[1]); }).join('') + '</row>');
   });
   if (!list.length) rows.push('<row r="' + FIRST + '" ht="24" customHeight="1">' + str('A' + FIRST, 'No visitors in this period.', 5) + '</row>');
 
@@ -1532,7 +1662,7 @@ function makeXlsx(list, period){
     '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.6" header="0.3" footer="0.3"/>' +
     '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
     '<headerFooter><oddFooter>&amp;L&amp;8Confidential. Contains personal data.&amp;R&amp;8Page &amp;P of &amp;N</oddFooter></headerFooter>' +
-    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' M' + FIRST + ':M' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
+    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' I' + FIRST + ':I' + lastRow + ' O' + FIRST + ':O' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
     '<drawing r:id="rId1"/></worksheet>';
 
   var F = function(extra, size, color){ return '<font>' + extra + '<sz val="' + size + '"/><color rgb="FF' + color + '"/><name val="Dubai"/><family val="2"/></font>'; };
