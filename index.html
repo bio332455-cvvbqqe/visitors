@@ -133,6 +133,10 @@ button{font-family:inherit;cursor:pointer}
 .inp{width:100%;height:60px;border-radius:14px;border:2px solid var(--sky-lt);background:var(--white);padding:0 18px;font-size:20px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:var(--mid);box-shadow:0 0 0 4px rgba(113,181,226,.28)}
 .inp[aria-invalid=true]{border-color:var(--ink)}
+select.inp{background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23021A91' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 16px center/24px 24px;padding-right:52px;cursor:pointer;font-family:inherit}
+[dir=rtl] select.inp{background-position:left 16px center;padding-right:18px;padding-left:52px}
+select.inp.empty{color:#626C7C}
+select.inp option{color:var(--ink)}
 .inp.ltr{direction:ltr}
 [dir=rtl] .inp.ltr{text-align:right}
 .err{display:none;align-items:center;gap:8px;margin-top:8px;font-size:15px;font-weight:700;color:var(--ink)}
@@ -303,7 +307,12 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
             <input class="inp ltr" id="fEmail" type="email" inputmode="email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
             <div class="err" id="errEmail"></div>
           </div>
-          <div class="fld" id="fldCompany" style="grid-column:1/-1">
+          <div class="fld" id="fldDept">
+            <label for="fDept" data-t="fDept"></label>
+            <select class="inp empty" id="fDept"></select>
+            <div class="err" id="errDept"></div>
+          </div>
+          <div class="fld" id="fldCompany">
             <label for="fCompany"><span data-t="fCompany"></span> <span class="opt" data-t="optional"></span></label>
             <input class="inp" id="fCompany" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="next">
           </div>
@@ -476,7 +485,7 @@ var T = {
     switchLang:'العربية', startAgain:'Start again',
     formTitle:'Visitor sign-in.', formLead:'It takes about one minute. When you finish, please take a seat.',
     secReason:'Reason for your visit', secDetails:'Your details', secHost:'Who you are visiting', secPrivacy:'Privacy',
-    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
+    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', fDept:'Department you are visiting', deptPick:'Choose a department', eDept:'Please choose the department you are visiting.', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
     privacyText:'We keep this record to manage safety and security at our premises. It is stored securely and only authorised staff can see it. We do not share it or use it for marketing. If you add a photo of your Emirates ID, it is kept with this record. To see or correct your record, please ask at reception.',
     consentText:'I agree that Bioscript Center may keep this record for this purpose.',
     signIn:'Sign in',
@@ -495,7 +504,7 @@ var T = {
     switchLang:'English', startAgain:'البدء من جديد',
     formTitle:'تسجيل دخول الزوار.', formLead:'يستغرق ذلك دقيقة تقريبًا. بعد الانتهاء، تفضّل بالجلوس.',
     secReason:'سبب الزيارة', secDetails:'بياناتك', secHost:'الجهة التي تزورها', secPrivacy:'الخصوصية',
-    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
+    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', fDept:'القسم الذي تزوره', deptPick:'اختر القسم', eDept:'يُرجى اختيار القسم الذي تزوره.', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
     privacyText:'نحتفظ بهذا السجل لإدارة السلامة والأمن في مقرّنا. يُحفظ السجل بشكل آمن، ولا يطّلع عليه إلا الموظفون المخوّلون. لا نشاركه مع أي جهة ولا نستخدمه لأغراض تسويقية. إذا أضفت صورة لبطاقة الهوية الإماراتية، فستُحفظ مع هذا السجل. للاطلاع على سجلك أو تصحيحه، يُرجى مراجعة الاستقبال.',
     consentText:'أوافق على احتفاظ مركز بايوسكريبت بهذا السجل لهذا الغرض.',
     signIn:'تسجيل الدخول',
@@ -532,6 +541,20 @@ var TYPES = [
   {k:'supplier',   en:'Supplier or vendor',        ar:'مورّد'},
   {k:'other',      en:'Other',                     ar:'أخرى'}
 ];
+var DEPTS = [
+  {k:'hr',        en:'HR',             ar:'الموارد البشرية'},
+  {k:'it',        en:'IT',             ar:'تقنية المعلومات'},
+  {k:'marketing', en:'Marketing',      ar:'التسويق'},
+  {k:'support',   en:'Client Support', ar:'دعم العملاء'},
+  {k:'finance',   en:'Finance',        ar:'المالية'},
+  {k:'dg',        en:'DG Office',      ar:'مكتب المدير العام'}
+];
+function deptLabel(k, l){ for (var i=0;i<DEPTS.length;i++) if (DEPTS[i].k === k) return DEPTS[i][l||'en']; return k || ''; }
+function renderDept(){
+  var sel = $('#fDept'), v = sel.value;
+  sel.innerHTML = '<option value="">' + esc(T[lang].deptPick) + '</option>' + DEPTS.map(function(d){ return '<option value="' + d.k + '">' + esc(d[lang]) + '</option>'; }).join('');
+  sel.value = v; sel.classList.toggle('empty', !sel.value);
+}
 var DEFAULT_HOSTS = [
   {en:'Reception', ar:'الاستقبال'},
   {en:'Genomics laboratory', ar:'مختبر الجينوم'},
@@ -874,7 +897,6 @@ function updateTypeFields(){
   var eReq = eidNeeded(), lReq = licNeeded();
   $('#eidOpt').hidden = !state.type || eReq;
   $('#fldLicense').hidden = !lReq;
-  $('#fldCompany').style.gridColumn = lReq ? '' : '1/-1';
   if (!eReq && $('#errEid').getAttribute('data-k') === 'eEidNeed'){ setErr($('#errEid'), null); $('#fEid').removeAttribute('aria-invalid'); }
   if (!lReq){ setErr($('#errLicense'), null); $('#fLicense').removeAttribute('aria-invalid'); }
 }
@@ -955,7 +977,7 @@ function applyLang(){
   $('#idleModal').setAttribute('lang', lang);
   setDisplay($('#formTitle'), L.formTitle, lang);
   $$('.js-arrow').forEach(function(a){ a.textContent = lang === 'ar' ? '←' : '→'; });
-  renderChips();
+  renderChips(); renderDept();
   $$('.err.show').forEach(function(e){ var k = e.getAttribute('data-k'); if (k) setErr(e, L[k]); });
 }
 function renderChips(){
@@ -977,8 +999,8 @@ function setErr(el, msg, key){
 function startForm(l){
   lang = l || 'en';
   resetState();
-  $('#visitForm').reset(); setEidPhoto(null); updateTypeFields();
-  ['#fName','#fMobile','#fEid','#fEmail','#fLicense'].forEach(function(s){ $(s).removeAttribute('aria-invalid'); });
+  $('#visitForm').reset(); setEidPhoto(null); updateTypeFields(); $('#fDept').value = ''; $('#fDept').classList.add('empty');
+  ['#fName','#fMobile','#fEid','#fEmail','#fLicense','#fDept'].forEach(function(s){ $(s).removeAttribute('aria-invalid'); });
   $$('#form .err').forEach(function(e){ setErr(e, null); });
   applyLang();
   show('form');
@@ -1000,7 +1022,8 @@ function progressValue(){
   if (emailOk($('#fEmail').value.trim())) n++;
   if (state.host != null) n++;
   if ($('#fConsent').checked) n++;
-  var total = 6;
+  var total = 7;
+  if ($('#fDept').value) n++;
   if (eidNeeded()){ total++; var ev = $('#fEid').value; if (eidPhoto || (eidDigits(ev) && eidOk(ev))) n++; }
   if (licNeeded()){ total++; if (licOk(licClean($('#fLicense').value))) n++; }
   return n / total;
@@ -1027,6 +1050,7 @@ $('#fName').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.p
 $('#fMobile').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fEid').focus(); } });
 $('#fEid').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fEmail').focus(); } });
 $('#fEid').addEventListener('input', function(){ var f = eidFormat(this.value); if (f !== this.value) this.value = f; });
+$('#fDept').addEventListener('change', function(){ this.classList.toggle('empty', !this.value); this.removeAttribute('aria-invalid'); setErr($('#errDept'), null); updateProgress(); });
 $('#fEmail').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fCompany').focus(); } });
 $('#fCompany').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); if (!$('#fldLicense').hidden) $('#fLicense').focus(); else this.blur(); } });
 $('#fLicense').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); this.blur(); } });
@@ -1044,7 +1068,7 @@ $('#visitForm').addEventListener('submit', function(e){
   if (busy) return;
   var L = T[lang], first = null;
   var name = $('#fName').value.replace(/\s+/g,' ').trim(), mobile = $('#fMobile').value.trim(),
-      eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim(), license = licNeeded() ? licClean($('#fLicense').value) : '';
+      eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim(), license = licNeeded() ? licClean($('#fLicense').value) : '', dept = $('#fDept').value;
   function bad(inputSel, errSel, key){
     setErr($(errSel), L[key], key);
     if (inputSel) $(inputSel).setAttribute('aria-invalid', 'true');
@@ -1056,6 +1080,7 @@ $('#visitForm').addEventListener('submit', function(e){
   if (!eidOk(eid)) bad('#fEid', '#errEid', 'eEid');
   if (eidOk(eid) && eidNeeded() && !eidDigits(eid) && !eidPhoto) bad('#fEid', '#errEid', 'eEidNeed');
   if (!emailOk(email)) bad('#fEmail', '#errEmail', 'eEmail');
+  if (!dept) bad('#fDept', '#errDept', 'eDept');
   if (licNeeded() && !licOk(license)) bad('#fLicense', '#errLicense', 'eLicense');
   if (state.host == null) bad(null, '#errHost', 'eHost');
   if (!$('#fConsent').checked) bad(null, '#errConsent', 'eConsent');
@@ -1069,7 +1094,7 @@ $('#visitForm').addEventListener('submit', function(e){
   var rec = {
     id: now.getTime().toString(36) + Math.random().toString(36).slice(2,6),
     ref: pad(now.getMonth()+1) + pad(now.getDate()) + '-' + Math.random().toString(36).slice(2,6).toUpperCase(),
-    ts: now.toISOString(), type: state.type, name: name, mobile: mobile, eid: eid, email: email, company: company, license: license, eidPhoto: !!eidPhoto,
+    ts: now.toISOString(), type: state.type, name: name, mobile: mobile, eid: eid, email: email, company: company, license: license, dept: dept, eidPhoto: !!eidPhoto,
     host: host.en, hostAr: host.ar || '', lang: lang, consent: true, device: settings.ipadName
   };
   busy = true; $('#submitBtn').disabled = true;
@@ -1246,7 +1271,7 @@ function filtered(){
   var from = periodStart(), q = query.toLowerCase();
   return records.filter(function(r){
     if (from && new Date(r.ts) < from) return false;
-    if (q && (r.name + ' ' + r.mobile + ' ' + (r.eid || '') + ' ' + r.company + ' ' + (r.license || '') + ' ' + r.email + ' ' + r.ref).toLowerCase().indexOf(q) < 0) return false;
+    if (q && (r.name + ' ' + r.mobile + ' ' + (r.eid || '') + ' ' + r.company + ' ' + (r.license || '') + ' ' + (r.dept ? deptLabel(r.dept) : '') + ' ' + r.email + ' ' + r.ref).toLowerCase().indexOf(q) < 0) return false;
     return true;
   }).sort(function(a, b){ return a.ts < b.ts ? 1 : -1; });
 }
@@ -1271,13 +1296,13 @@ function renderStaff(){
   $('#sNote').textContent = list.length + (list.length === 1 ? ' visitor' : ' visitors') + ' shown  ·  Last PDF: ' + (settings.lastPdf ? fDate(new Date(settings.lastPdf)) + ', ' + fTime(new Date(settings.lastPdf)) : 'never') + '  ·  Last Excel: ' + (settings.lastXlsx ? fDate(new Date(settings.lastXlsx)) + ', ' + fTime(new Date(settings.lastXlsx)) : 'never');
   $('#pdfBtn').disabled = !list.length; $('#xlsBtn').disabled = !list.length;
   if (!list.length){ $('#sList').innerHTML = '<p class="empty">No visitors in this period.</p>'; return; }
-  $('#sList').innerHTML = '<table class="tbl"><thead><tr><th>Signed in</th><th>Name</th><th>Mobile</th><th class="hide-sm">Company</th><th>Reason</th><th class="hide-sm">Visiting</th><th></th></tr></thead><tbody>' +
+  $('#sList').innerHTML = '<table class="tbl"><thead><tr><th>Signed in</th><th>Name</th><th>Mobile</th><th class="hide-sm">Company</th><th>Reason</th><th>Department</th><th class="hide-sm">Visiting</th><th></th></tr></thead><tbody>' +
     list.map(function(r){
       var d = new Date(r.ts);
       return '<tr><td class="nw"><div>' + fDate(d) + '</div><div class="s">' + fTime(d) + '</div></td>' +
         '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + '</td>' +
         '<td class="nw" dir="ltr">' + esc(r.mobile) + '</td><td class="hide-sm">' + esc(r.company || '–') + (r.license ? '<div class="s">Trade license ' + esc(r.license) + '</div>' : '') + '</td>' +
-        '<td>' + esc(typeLabel(r.type)) + '</td><td class="hide-sm">' + esc(r.host) + '</td>' +
+        '<td>' + esc(typeLabel(r.type)) + '</td><td>' + esc(r.dept ? deptLabel(r.dept) : '–') + '</td><td class="hide-sm">' + esc(r.host) + '</td>' +
         '<td><button class="btn btn-secondary pdf" data-id="' + esc(r.id) + '">PDF</button></td></tr>';
     }).join('') + '</tbody></table>';
 }
@@ -1439,7 +1464,7 @@ function makeLogPdf(list, period){
   var W = 842, H = 595, perPage = 14, pages = [], cv = document.createElement('canvas');
   for (var i=0;i<list.length;i+=perPage) pages.push(list.slice(i, i+perPage));
   if (!pages.length) pages.push([]);
-  var cols = [ {h:'Signed in', w:84}, {h:'Name', w:176}, {h:'Mobile', w:104}, {h:'Company', w:118}, {h:'Reason', w:102}, {h:'Visiting', w:118}, {h:'Ref', w:68} ];
+  var cols = [ {h:'Signed in', w:84}, {h:'Name', w:130}, {h:'Mobile', w:96}, {h:'Company', w:100}, {h:'Reason', w:112}, {h:'Department', w:80}, {h:'Visiting', w:100}, {h:'Ref', w:68} ];
   return loadImg(LOGO_SRC).then(function(logo){
     var out = [], chain = Promise.resolve();
     pages.forEach(function(rows, pi){
@@ -1454,7 +1479,7 @@ function makeLogPdf(list, period){
         rows.forEach(function(r){
           var d = new Date(r.ts), x = 36, cells = [
             [fDate(d), fTime(d)], [r.name, r.email], [r.mobile, ''], [r.company || '–', r.license ? 'License ' + r.license : ''],
-            [typeLabel(r.type), ''], [r.host, ''], [r.ref, '']
+            [typeLabel(r.type), ''], [r.dept ? deptLabel(r.dept) : '–', ''], [r.host, ''], [r.ref, '']
           ];
           cells.forEach(function(c, ci){
             txt(ctx, c[0], x + 6, y + 13, {size:9.2, weight: ci === 1 ? 700 : 400, color: ci === 1 ? '#021A91' : '#474747', max: cols[ci].w - 12});
@@ -1504,7 +1529,7 @@ function makeRecordPdf(r){
       ['Full name', r.name], ['Mobile number', r.mobile],
       ['Emirates ID', r.eid || (r.eidPhoto ? 'Photo on page 2' : '–')],
       ['Email', r.email || '–'], ['Company or organisation', r.company || '–'], ['Trade license', r.license || '–'],
-      ['Reason for visit', typeLabel(r.type)], ['Visiting', r.host],
+      ['Reason for visit', typeLabel(r.type)], ['Department', r.dept ? deptLabel(r.dept) : '–'], ['Visiting', r.host],
       ['Form language', r.lang === 'ar' ? 'Arabic' : 'English'], ['iPad', r.device || settings.ipadName]
     ];
     var y = 186;
@@ -1619,7 +1644,7 @@ function makeXlsx(list, period){
   var now = new Date(), HEAD = 9, FIRST = HEAD + 1;
   var cols = [
     {h:'Date', w:14}, {h:'Time', w:9}, {h:'Full name', w:26}, {h:'Mobile number', w:18}, {h:'Emirates ID', w:21}, {h:'ID photo', w:16},
-    {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Trade license', w:18}, {h:'Reason for visit', w:23}, {h:'Visiting', w:26},
+    {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Trade license', w:18}, {h:'Reason for visit', w:23}, {h:'Department', w:18}, {h:'Visiting', w:26},
     {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'Reference', w:13}
   ];
   function cn(i){ return String.fromCharCode(65 + i); }
@@ -1640,7 +1665,7 @@ function makeXlsx(list, period){
     var d = new Date(r.ts), n = FIRST + ri;
     var cells = [
       [serial(d), 6, 1], [(d.getHours() * 60 + d.getMinutes()) / 1440, 8, 1], [r.name, 7], [r.mobile, 5], [r.eid, 5],
-      [r.eidPhoto ? 'Yes (in visitor PDF)' : 'No', 5], [r.email, 5], [r.company, 5], [r.license, 5], [typeLabel(r.type), 5], [r.host, 5],
+      [r.eidPhoto ? 'Yes (in visitor PDF)' : 'No', 5], [r.email, 5], [r.company, 5], [r.license, 5], [typeLabel(r.type), 5], [r.dept ? deptLabel(r.dept) : '', 5], [r.host, 5],
       [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.ref, 5]
     ];
     rows.push('<row r="' + n + '" ht="24" customHeight="1">' + cells.map(function(c, ci){ return c[2] ? num(cn(ci) + n, c[0], c[1]) : str(cn(ci) + n, c[0], c[1]); }).join('') + '</row>');
@@ -1659,7 +1684,7 @@ function makeXlsx(list, period){
     '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.6" header="0.3" footer="0.3"/>' +
     '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
     '<headerFooter><oddFooter>&amp;L&amp;8Confidential. Contains personal data.&amp;R&amp;8Page &amp;P of &amp;N</oddFooter></headerFooter>' +
-    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' I' + FIRST + ':I' + lastRow + ' O' + FIRST + ':O' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
+    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' I' + FIRST + ':I' + lastRow + ' P' + FIRST + ':P' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
     '<drawing r:id="rId1"/></worksheet>';
 
   var F = function(extra, size, color){ return '<font>' + extra + '<sz val="' + size + '"/><color rgb="FF' + color + '"/><name val="Dubai"/><family val="2"/></font>'; };
