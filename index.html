@@ -351,7 +351,7 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
     <p class="lead" id="thanksLead"></p>
     <p class="t-ref"><span data-t="reference"></span> <strong id="thanksRef"></strong></p>
     <div class="t-actions">
-      <button class="btn btn-secondary btn-xl" id="savePdfBtn" data-t="savePdf">Save as PDF</button>
+      <button class="btn btn-secondary btn-xl" id="savePdfBtn" data-t="savePdf" hidden>Save as PDF</button>
       <button class="btn btn-primary btn-xl" id="doneBtn" data-t="done">Done</button>
     </div>
     <p class="t-saved" id="thanksSaved" role="status"></p>
@@ -403,7 +403,6 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
           <button class="btn btn-secondary" id="deleteAll">Delete all records…</button>
         </div>
-        <label class="chk"><input type="checkbox" id="setShowSave"> Show “Save as PDF” to visitors after sign-in</label>
       </div>
       <div class="fld">
         <label for="setHosts">“Who you are visiting” list</label>
@@ -1107,7 +1106,7 @@ function showThanks(rec){
     thanksBand.rtl = lang === 'ar';
     if (thanksBand.layout()){ thanksBand.reset(); thanksBand.setProgress(1, 'full'); }
   });
-  $('#savePdfBtn').hidden = settings.showSave === false;
+  $('#savePdfBtn').hidden = true;   // visitors just press Done; staff save PDFs from the records screen
   $('#savePdfBtn').disabled = false;
   $('#thanksSaved').textContent = '';
   restartThanks(12);
@@ -1264,9 +1263,7 @@ function periodLabel(list){
 }
 function openStaff(){ period = 'today'; query = ''; $('#sSearch').value = ''; $('#setName').value = settings.ipadName;
   $('#setHosts').value = settings.hosts.map(function(h){ return h.en + (h.ar ? ' | ' + h.ar : ''); }).join('\n');
-  $('#setShowSave').checked = settings.showSave !== false;
   $('#settings').open = false; renderStaff(); show('staff'); armStaff(); }
-$('#setShowSave').addEventListener('change', function(){ settings.showSave = this.checked; saveSettings(); });
 function renderStaff(){
   $$('.seg button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-period') === period); });
   var list = filtered();
