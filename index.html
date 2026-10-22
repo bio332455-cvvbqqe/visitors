@@ -395,6 +395,7 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
   <div class="s-foot">
     <span class="note" id="sNote"></span>
     <span class="spacer"></span>
+    <button class="btn btn-secondary" id="xlsBtn">Export to Excel</button>
     <button class="btn btn-primary" id="pdfBtn">Save this list as PDF</button>
   </div>
 </section>
@@ -465,7 +466,7 @@ var T = {
     thanks:'Thank you, {name}.', thanksLead:'You signed in at {time}. Please take a seat. A member of our team will be with you shortly.',
     reference:'Reference', done:'Done', countdown:'This screen will reset in {n} seconds.',
     savePdf:'Save as PDF', saving:'Saving…', saved:'Saved. You can tap Done.', saveFail:'Sorry, the PDF could not be saved. Please ask reception.',
-    pdfReady:'Your PDF is ready.', close:'Close', saveBtn:'Save PDF', saveToIpad:'Save to iPad',
+    pdfReady:'Your PDF is ready.', xlsReady:'Your Excel file is ready.', xlsSaveBtn:'Save Excel file', xlsHelpDownload:'Tap <strong>Save Excel file</strong>, then <strong>Download</strong>. It goes to <strong>Files › Downloads</strong>.', close:'Close', saveBtn:'Save PDF', saveToIpad:'Save to iPad',
     helpShare:'Tap <strong>Save to iPad</strong>, then choose <strong>Save to Files</strong>.',
     helpDownload:'Tap <strong>Save PDF</strong>, then <strong>Download</strong>. It goes to <strong>Files › Downloads</strong>.',
     idleTitle:'Do you need more time?', idleText:'For your privacy, this form will clear in {n} seconds.', idleStay:'Yes, continue'
@@ -484,7 +485,7 @@ var T = {
     thanks:'شكرًا لك، {name}.', thanksLead:'سُجّل دخولك الساعة {time}. تفضّل بالجلوس، وسيكون أحد أعضاء فريقنا معك قريبًا.',
     reference:'الرقم المرجعي', done:'تم', countdown:'ستعود هذه الشاشة إلى البداية خلال {n} ثانية.',
     savePdf:'حفظ كملف PDF', saving:'جارٍ الحفظ…', saved:'تم الحفظ. يمكنك الضغط على «تم».', saveFail:'عذرًا، تعذّر حفظ الملف. يُرجى إبلاغ موظف الاستقبال.',
-    pdfReady:'ملف PDF جاهز.', close:'إغلاق', saveBtn:'حفظ PDF', saveToIpad:'حفظ على الجهاز',
+    pdfReady:'ملف PDF جاهز.', xlsReady:'ملف Excel جاهز.', xlsSaveBtn:'حفظ ملف Excel', xlsHelpDownload:'اضغط <strong>حفظ ملف Excel</strong>، ثم <strong>تنزيل</strong>. ستجده في <strong>الملفات › التنزيلات</strong>.', close:'إغلاق', saveBtn:'حفظ PDF', saveToIpad:'حفظ على الجهاز',
     helpShare:'اضغط <strong>حفظ على الجهاز</strong>، ثم اختر <strong>حفظ في الملفات</strong>.',
     helpDownload:'اضغط <strong>حفظ PDF</strong>، ثم <strong>تنزيل</strong>. ستجده في <strong>الملفات › التنزيلات</strong>.',
     idleTitle:'هل تحتاج إلى مزيد من الوقت؟', idleText:'حفاظًا على خصوصيتك، سيُمسح هذا النموذج خلال {n} ثانية.', idleStay:'نعم، أكمل'
@@ -1152,8 +1153,8 @@ function renderStaff(){
   $$('.seg button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-period') === period); });
   var list = filtered();
   $('#sSub').textContent = settings.ipadName + '  ·  ' + records.length + (records.length === 1 ? ' record' : ' records') + ' saved on this iPad';
-  $('#sNote').textContent = list.length + (list.length === 1 ? ' visitor' : ' visitors') + ' shown  ·  Last PDF saved: ' + (settings.lastPdf ? fDate(new Date(settings.lastPdf)) + ', ' + fTime(new Date(settings.lastPdf)) : 'never');
-  $('#pdfBtn').disabled = !list.length;
+  $('#sNote').textContent = list.length + (list.length === 1 ? ' visitor' : ' visitors') + ' shown  ·  Last PDF: ' + (settings.lastPdf ? fDate(new Date(settings.lastPdf)) + ', ' + fTime(new Date(settings.lastPdf)) : 'never') + '  ·  Last Excel: ' + (settings.lastXlsx ? fDate(new Date(settings.lastXlsx)) + ', ' + fTime(new Date(settings.lastXlsx)) : 'never');
+  $('#pdfBtn').disabled = !list.length; $('#xlsBtn').disabled = !list.length;
   if (!list.length){ $('#sList').innerHTML = '<p class="empty">No visitors in this period.</p>'; return; }
   $('#sList').innerHTML = '<table class="tbl"><thead><tr><th>Signed in</th><th>Name</th><th>Mobile</th><th class="hide-sm">Company</th><th>Reason</th><th class="hide-sm">Visiting</th><th></th></tr></thead><tbody>' +
     list.map(function(r){
@@ -1175,7 +1176,7 @@ $('#saveHosts').addEventListener('click', function(){
   settings.hosts = list; saveSettings(); this.textContent = 'Saved'; var b = this; setTimeout(function(){ b.textContent = 'Save list'; }, 1500);
 });
 $('#deleteAll').addEventListener('click', function(){
-  $('#confirmText').textContent = 'This removes all ' + records.length + ' records from this iPad. It cannot be undone. Save a PDF first if you need to keep them.';
+  $('#confirmText').textContent = 'This removes all ' + records.length + ' records from this iPad. It cannot be undone. Save a PDF or Excel file first if you need to keep them.';
   $('#confirmModal').classList.add('show');
 });
 $('#confirmNo').addEventListener('click', function(){ $('#confirmModal').classList.remove('show'); });
@@ -1199,25 +1200,35 @@ $('#pdfBtn').addEventListener('click', function(){
     .catch(function(){ alertBox('Sorry, the PDF could not be made. Please try again.'); })
     .then(function(){ btn.disabled = false; btn.textContent = 'Save this list as PDF'; });
 });
+$('#xlsBtn').addEventListener('click', function(){
+  var list = filtered(); if (!list.length) return;
+  var btn = this; btn.disabled = true; btn.textContent = 'Making Excel file…';
+  var fname = 'Bioscript-visitors_' + (settings.ipadName.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'iPad') + '_' + fIso(new Date()) + '.xlsx';
+  savePdf(function(){ return Promise.resolve().then(function(){ return makeXlsx(list.slice().reverse(), periodLabel(list)); }); }, fname, 'en')
+    .then(function(res){ if (res === 'saved') alertBox('Saved: ' + fname); })
+    .catch(function(){ alertBox('Sorry, the Excel file could not be made. Please try again.'); })
+    .then(function(){ btn.disabled = false; btn.textContent = 'Export to Excel'; });
+});
 function alertBox(msg){ $('#sNote').textContent = msg; }
 
 /* ---------------- saving a PDF ----------------
    Computer (Edge / Chrome): the "Save As" window opens straight away, so you choose the folder.
    iPad and other browsers: a small window offers "Save PDF" (download) or the share menu. */
-var pending = null;
+var pending = null, saveKind = 'pdf';
 function hasPicker(){
   try { return typeof window.showSaveFilePicker === 'function' && window.self === window.top; } catch(e){ return false; }
 }
 function savePdf(makeBytes, filename, l){
+  saveKind = isXlsx(filename) ? 'xlsx' : 'pdf';
   if (hasPicker()){
     var picker;
     try {
-      picker = window.showSaveFilePicker({ suggestedName: filename, types: [{ description: 'PDF document', accept: {'application/pdf': ['.pdf']} }] });
+      picker = window.showSaveFilePicker({ suggestedName: filename, types: [pickerType(filename)] });
     } catch(e){ picker = Promise.reject(e); }
     return picker.then(function(handle){
       return makeBytes().then(function(bytes){
         return handle.createWritable().then(function(w){
-          return w.write(new Blob([bytes], {type:'application/pdf'})).then(function(){ return w.close(); });
+          return w.write(new Blob([bytes], {type: mimeOf(filename)})).then(function(){ return w.close(); });
         });
       }).then(function(){ savedOk(); return 'saved'; });
     }, function(err){
@@ -1228,22 +1239,23 @@ function savePdf(makeBytes, filename, l){
   return makeBytes().then(function(bytes){ offerFile(bytes, filename, l); return 'offered'; });
 }
 function offerFile(bytes, filename, l){
-  var L = T[l || 'en'], blob = new Blob([bytes], {type:'application/pdf'});
+  var L = T[l || 'en'], blob = new Blob([bytes], {type: mimeOf(filename)});
   pending = {blob: blob, filename: filename};
   var m = $('#fileModal'); m.setAttribute('lang', l || 'en'); m.setAttribute('dir', l === 'ar' ? 'rtl' : 'ltr');
-  $('#fileTitle').innerHTML = dotify(L.pdfReady, false);
+  var xl = isXlsx(filename);
+  $('#fileTitle').innerHTML = dotify(xl ? L.xlsReady : L.pdfReady, false);
   $('#fileName').textContent = filename + '  (' + Math.max(1, Math.round(blob.size/1024)) + ' KB)';
   var canShare = window.isSecureContext && isIOS && !!navigator.share;
-  $('#fileSave').textContent = canShare ? L.saveToIpad : L.saveBtn;
+  $('#fileSave').textContent = canShare ? L.saveToIpad : (xl ? L.xlsSaveBtn : L.saveBtn);
   $('#fileClose').textContent = L.close;
-  $('#fileHelp').innerHTML = canShare ? L.helpShare : L.helpDownload;
+  $('#fileHelp').innerHTML = canShare ? L.helpShare : (xl ? L.xlsHelpDownload : L.helpDownload);
   m.classList.add('show');
 }
 $('#fileClose').addEventListener('click', function(){ $('#fileModal').classList.remove('show'); });
 $('#fileSave').addEventListener('click', function(){
   if (!pending) return;
   var file = null;
-  try { file = new File([pending.blob], pending.filename, {type:'application/pdf'}); } catch(e){}
+  try { file = new File([pending.blob], pending.filename, {type: mimeOf(pending.filename)}); } catch(e){}
   if (window.isSecureContext && isIOS && file && navigator.canShare && navigator.canShare({files:[file]})){
     navigator.share({files:[file], title: pending.filename}).then(savedOk).catch(function(err){ if (err && err.name !== 'AbortError') download(); });
   } else download();
@@ -1255,7 +1267,7 @@ function download(){
   setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
   savedOk();
 }
-function savedOk(){ settings.lastPdf = new Date().toISOString(); saveSettings(); $('#fileModal').classList.remove('show'); if (current === 'thanks') $('#thanksSaved').textContent = T[lang].saved; if (current === 'staff') renderStaff(); }
+function savedOk(){ settings[saveKind === 'xlsx' ? 'lastXlsx' : 'lastPdf'] = new Date().toISOString(); saveSettings(); $('#fileModal').classList.remove('show'); if (current === 'thanks') $('#thanksSaved').textContent = T[lang].saved; if (current === 'staff') renderStaff(); }
 
 /* =====================================================================
    PDF maker — draws each A4 page on a canvas (so Arabic names print
@@ -1414,6 +1426,180 @@ function buildPdf(jpegs, pxW, pxH, W, H, titleText){
   add(x + 'trailer\n<< /Size ' + (total + 1) + ' /Root 1 0 R /Info 3 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
   var out = new Uint8Array(len), o = 0; parts.forEach(function(b){ out.set(b, o); o += b.length; });
   return out;
+}
+
+/* =====================================================================
+   Excel maker — builds a real .xlsx file (with the logo) on the iPad.
+   No internet needed. Text is stored as text, so phone numbers and
+   Emirates IDs keep their leading zeros.
+   ===================================================================== */
+var XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+function isXlsx(fn){ return /\.xlsx$/i.test(String(fn || '')); }
+function mimeOf(fn){ return isXlsx(fn) ? XLSX_MIME : 'application/pdf'; }
+function pickerType(fn){
+  var acc = {};
+  if (isXlsx(fn)){ acc[XLSX_MIME] = ['.xlsx']; return { description: 'Excel workbook', accept: acc }; }
+  acc['application/pdf'] = ['.pdf']; return { description: 'PDF document', accept: acc };
+}
+var CRC_T = null;
+function crc32(u){
+  if (!CRC_T){ CRC_T = new Uint32Array(256); for (var n=0;n<256;n++){ var c = n; for (var k=0;k<8;k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
+  var r = 0xFFFFFFFF; for (var i=0;i<u.length;i++) r = CRC_T[(r ^ u[i]) & 255] ^ (r >>> 8);
+  return (r ^ 0xFFFFFFFF) >>> 0;
+}
+function zipStore(files){ // [{name, data}] -> Uint8Array (zip, stored)
+  var enc = new TextEncoder(), parts = [], central = [], off = 0, d = new Date();
+  var dt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+  var dd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+  files.forEach(function(f){
+    var name = enc.encode(f.name), data = typeof f.data === 'string' ? enc.encode(f.data) : f.data, crc = crc32(data);
+    var lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, dt, true); lh.setUint16(12, dd, true); lh.setUint32(14, crc, true);
+    lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    var ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+    ch.setUint16(12, dt, true); ch.setUint16(14, dd, true); ch.setUint32(16, crc, true);
+    ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true); ch.setUint16(28, name.length, true);
+    ch.setUint16(30, 0, true); ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true); ch.setUint32(38, 0, true); ch.setUint32(42, off, true);
+    parts.push(new Uint8Array(lh.buffer), name, data);
+    central.push(new Uint8Array(ch.buffer), name);
+    off += 30 + name.length + data.length;
+  });
+  var cd = 0; central.forEach(function(b){ cd += b.length; });
+  var end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cd, true); end.setUint32(16, off, true);
+  var all = parts.concat(central, [new Uint8Array(end.buffer)]), len = 0; all.forEach(function(b){ len += b.length; });
+  var out = new Uint8Array(len), o = 0; all.forEach(function(b){ out.set(b, o); o += b.length; });
+  return out;
+}
+function dataUrlBytes(src){ var s = atob(String(src).split(',')[1]), u = new Uint8Array(s.length); for (var i=0;i<s.length;i++) u[i] = s.charCodeAt(i); return u; }
+function xe(s){
+  return String(s == null ? '' : s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function makeXlsx(list, period){
+  var now = new Date(), HEAD = 9, FIRST = HEAD + 1;
+  var cols = [
+    {h:'Date', w:14}, {h:'Time', w:9}, {h:'Full name', w:26}, {h:'Mobile number', w:18}, {h:'Emirates ID', w:21},
+    {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Reason for visit', w:23}, {h:'Visiting', w:26},
+    {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'Reference', w:13}
+  ];
+  function cn(i){ return String.fromCharCode(65 + i); }
+  var LAST = cn(cols.length - 1), lastRow = HEAD + Math.max(list.length, 1);
+  function serial(d){ return (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(1899, 11, 30)) / 86400000; }
+  function str(ref, s, st){ s = String(s == null ? '' : s); return s ? '<c r="' + ref + '" s="' + st + '" t="inlineStr"><is><t xml:space="preserve">' + xe(s) + '</t></is></c>' : '<c r="' + ref + '" s="' + st + '"/>'; }
+  function num(ref, n, st){ return '<c r="' + ref + '" s="' + st + '"><v>' + n + '</v></c>'; }
+  function run(t, size, color){ return '<r><rPr><b/><sz val="' + size + '"/><color rgb="FF' + color + '"/><rFont val="Dubai"/></rPr><t xml:space="preserve">' + xe(t) + '</t></r>'; }
+  var rows = [];
+  for (var i=1;i<=4;i++) rows.push('<row r="' + i + '" ht="22.5" customHeight="1"/>');
+  rows.push('<row r="5" ht="34" customHeight="1"><c r="A5" s="1" t="inlineStr"><is>' + run('Visitor log', 20, '021A91') + run('.', 20, 'F26B1D') + '</is></c></row>');
+  var info = period + '  ·  ' + list.length + (list.length === 1 ? ' visitor' : ' visitors') + '  ·  ' + settings.ipadName + '  ·  Exported ' + fDate(now) + ', ' + fTime(now);
+  rows.push('<row r="6" ht="20" customHeight="1">' + str('A6', info, 2) + '</row>');
+  rows.push('<row r="7" ht="18" customHeight="1">' + str('A7', 'Confidential. Contains personal data. Keep it secure and delete it when it is no longer needed.', 3) + '</row>');
+  rows.push('<row r="8" ht="9" customHeight="1"/>');
+  rows.push('<row r="' + HEAD + '" ht="28" customHeight="1">' + cols.map(function(c, ci){ return str(cn(ci) + HEAD, c.h.toUpperCase(), 4); }).join('') + '</row>');
+  list.forEach(function(r, ri){
+    var d = new Date(r.ts), n = FIRST + ri;
+    rows.push('<row r="' + n + '" ht="24" customHeight="1">' + [
+      num('A' + n, serial(d), 6),
+      num('B' + n, (d.getHours() * 60 + d.getMinutes()) / 1440, 8),
+      str('C' + n, r.name, 7),
+      str('D' + n, r.mobile, 5),
+      str('E' + n, r.eid, 5),
+      str('F' + n, r.email, 5),
+      str('G' + n, r.company, 5),
+      str('H' + n, typeLabel(r.type), 5),
+      str('I' + n, r.host, 5),
+      str('J' + n, r.lang === 'ar' ? 'Arabic' : 'English', 5),
+      str('K' + n, r.device || settings.ipadName, 5),
+      str('L' + n, r.consent === false ? 'No' : 'Yes', 5),
+      str('M' + n, r.ref, 5)
+    ].join('') + '</row>');
+  });
+  if (!list.length) rows.push('<row r="' + FIRST + '" ht="24" customHeight="1">' + str('A' + FIRST, 'No visitors in this period.', 5) + '</row>');
+
+  var NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  var X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  var sheet = X + '<worksheet ' + NS + '><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' +
+    '<dimension ref="A1:' + LAST + lastRow + '"/>' +
+    '<sheetViews><sheetView showGridLines="0" workbookViewId="0"><pane ySplit="' + HEAD + '" topLeftCell="A' + FIRST + '" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A' + FIRST + '" sqref="A' + FIRST + '"/></sheetView></sheetViews>' +
+    '<sheetFormatPr defaultRowHeight="18"/>' +
+    '<cols>' + cols.map(function(c, ci){ return '<col min="' + (ci+1) + '" max="' + (ci+1) + '" width="' + c.w + '" customWidth="1"/>'; }).join('') + '</cols>' +
+    '<sheetData>' + rows.join('') + '</sheetData>' +
+    (list.length ? '<autoFilter ref="A' + HEAD + ':' + LAST + lastRow + '"/>' : '') +
+    '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.6" header="0.3" footer="0.3"/>' +
+    '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
+    '<headerFooter><oddFooter>&amp;L&amp;8Confidential. Contains personal data.&amp;R&amp;8Page &amp;P of &amp;N</oddFooter></headerFooter>' +
+    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' M' + FIRST + ':M' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
+    '<drawing r:id="rId1"/></worksheet>';
+
+  var F = function(extra, size, color){ return '<font>' + extra + '<sz val="' + size + '"/><color rgb="FF' + color + '"/><name val="Dubai"/><family val="2"/></font>'; };
+  var styles = X + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<numFmts count="2"><numFmt numFmtId="164" formatCode="d mmm yyyy"/><numFmt numFmtId="165" formatCode="hh:mm"/></numFmts>' +
+    '<fonts count="6">' + F('', 11, '333A48') + F('<b/>', 20, '021A91') + F('', 10.5, '333A48') + F('', 9, '626C7C') + F('<b/>', 9, '021A91') + F('<b/>', 11, '021A91') + '</fonts>' +
+    '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFE8F4FC"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+    '<borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border>' +
+    '<border><left/><right/><top/><bottom style="thin"><color rgb="FFB9DAF1"/></bottom><diagonal/></border>' +
+    '<border><left/><right/><top/><bottom style="medium"><color rgb="FF71B5E2"/></bottom><diagonal/></border></borders>' +
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    '<cellXfs count="9">' +
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+      '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="4" fillId="2" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+      '<xf numFmtId="49" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+      '<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+      '<xf numFmtId="49" fontId="5" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+      '<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+    '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+
+  var sheetName = 'Visitors';
+  var workbook = X + '<workbook ' + NS + '><bookViews><workbookView/></bookViews><sheets><sheet name="' + sheetName + '" sheetId="1" r:id="rId1"/></sheets>' +
+    '<definedNames>' + (list.length ? '<definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">' + sheetName + '!$A$' + HEAD + ':$' + LAST + '$' + lastRow + '</definedName>' : '') +
+    '<definedName name="_xlnm.Print_Titles" localSheetId="0">' + sheetName + '!$' + HEAD + ':$' + HEAD + '</definedName></definedNames></workbook>';
+
+  // Logo: the main lockup on its sky-blue tile, kept at its true shape (min 140 px wide on screen)
+  var logo = dataUrlBytes(LOGO_SRC), lw = 250, lh = Math.round(lw * 230 / 760), EMU = 9525;
+  try { var dv = new DataView(logo.buffer); lh = Math.round(lw * dv.getUint32(20) / dv.getUint32(16)); } catch(e){}
+  var drawing = X + '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+    '<xdr:oneCellAnchor><xdr:from><xdr:col>0</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>' + (14 * EMU) + '</xdr:rowOff></xdr:from>' +
+    '<xdr:ext cx="' + lw * EMU + '" cy="' + lh * EMU + '"/>' +
+    '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Bioscript logo" descr="Bioscript by Qaly Health Shield"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>' +
+    '<xdr:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>' +
+    '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + lw * EMU + '" cy="' + lh * EMU + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>' +
+    '<xdr:clientData/></xdr:oneCellAnchor></xdr:wsDr>';
+
+  var REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/';
+  function rels(list){ return X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + list.map(function(r, i){ return '<Relationship Id="rId' + (i+1) + '" Type="' + r[0] + '" Target="' + r[1] + '"/>'; }).join('') + '</Relationships>'; }
+  var iso = now.toISOString().replace(/\.\d+Z$/, 'Z');
+  var files = [
+    {name: '[Content_Types].xml', data: X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' +
+      '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
+      '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>'},
+    {name: '_rels/.rels', data: rels([[REL + 'officeDocument', 'xl/workbook.xml'], ['http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties', 'docProps/core.xml'], [REL + 'extended-properties', 'docProps/app.xml']])},
+    {name: 'docProps/core.xml', data: X + '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+      '<dc:title>' + xe('Visitor log - ' + settings.ipadName) + '</dc:title><dc:creator>Bioscript Center</dc:creator>' +
+      '<dcterms:created xsi:type="dcterms:W3CDTF">' + iso + '</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">' + iso + '</dcterms:modified></cp:coreProperties>'},
+    {name: 'docProps/app.xml', data: X + '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Bioscript visitor sign-in</Application></Properties>'},
+    {name: 'xl/workbook.xml', data: workbook},
+    {name: 'xl/_rels/workbook.xml.rels', data: rels([[REL + 'worksheet', 'worksheets/sheet1.xml'], [REL + 'styles', 'styles.xml']])},
+    {name: 'xl/styles.xml', data: styles},
+    {name: 'xl/worksheets/sheet1.xml', data: sheet},
+    {name: 'xl/worksheets/_rels/sheet1.xml.rels', data: rels([[REL + 'drawing', '../drawings/drawing1.xml']])},
+    {name: 'xl/drawings/drawing1.xml', data: drawing},
+    {name: 'xl/drawings/_rels/drawing1.xml.rels', data: rels([[REL + 'image', '../media/image1.png']])},
+    {name: 'xl/media/image1.png', data: logo}
+  ];
+  return zipStore(files);
 }
 
 /* ---------------- start ---------------- */
