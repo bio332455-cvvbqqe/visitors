@@ -123,6 +123,26 @@ button{font-family:inherit;cursor:pointer}
 @media (max-width:760px){.grid2{grid-template-columns:1fr}}
 .fld label{display:block;font-size:16px;font-weight:700;color:var(--ink);margin:0 0 7px}
 .fld .opt{font-weight:400;color:var(--text)}
+.nda-doc{border:2px solid var(--sky-lt);border-radius:18px;background:var(--white);padding:26px 26px 12px;margin:0 0 28px}
+.nda-row{display:grid;grid-template-columns:40px minmax(0,1fr) minmax(0,1fr) 40px;gap:0 22px;padding:0 0 14px;font-size:16px;line-height:1.55;color:var(--text)}
+.nda-row .n-en,.nda-row .n-ar{font-weight:700;color:var(--ink)}
+.nda-row .t-ar,.nda-row .n-ar{text-align:right}
+.nda-row.k-title,.nda-row.k-head{font-weight:700;color:var(--ink)}
+.nda-row.k-title{font-size:26px;line-height:1.25;padding-bottom:20px}
+.nda-row.k-head{font-size:17px;padding:8px 0 10px;border-bottom:1px solid var(--sky-lt);margin-bottom:14px}
+.nda-row:not(.k-item):not(.k-party2) .n-en,.nda-row:not(.k-item):not(.k-party2) .n-ar{display:none}
+.nda-row:not(.k-item):not(.k-party2) .t-en{grid-column:1/3}
+.nda-row:not(.k-item):not(.k-party2) .t-ar{grid-column:3/5}
+.nda-row.k-party2 .t-en,.nda-row.k-party2 .t-ar{color:var(--ink);font-weight:700}
+@media (max-width:760px){.nda-row{grid-template-columns:30px minmax(0,1fr)}.nda-row .t-ar{grid-column:2}.nda-row .n-ar{display:none}
+  .nda-row:not(.k-item):not(.k-party2) .t-en,.nda-row:not(.k-item):not(.k-party2) .t-ar{grid-column:1/-1}}
+.sig-box{display:flex;flex-direction:column;gap:12px;margin:0 0 30px}
+.sig-note{font-size:17px;color:var(--text);margin:0}
+.sig-pad{position:relative;height:230px;border:2px dashed var(--sky);border-radius:18px;background:var(--ice)}
+.sig-pad canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.sig-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#626C7C;pointer-events:none}
+.sig-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sig-who{font-size:16px;color:var(--text)}
 .fld .help{font-size:15px;color:var(--text);margin:8px 0 0}
 .btn-cam{min-height:50px;padding:0 20px;font-size:17px;gap:10px;margin-top:10px}
 .btn-cam svg{width:24px;height:24px;flex:none}
@@ -321,6 +341,10 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
             <input class="inp ltr" id="fLicense" type="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" maxlength="40" enterkeyhint="done">
             <div class="err" id="errLicense"></div>
           </div>
+          <div class="fld" id="fldAddress" hidden>
+            <label for="fAddress"><span data-t="fAddress"></span> <span class="opt" data-t="optional"></span></label>
+            <input class="inp" id="fAddress" type="text" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="160" enterkeyhint="done">
+          </div>
         </div>
       </div>
 
@@ -353,6 +377,31 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
 </section>
 
 <!-- ================= THANK YOU ================= -->
+<section class="screen" id="nda" aria-label="Non-disclosure agreement">
+  <header class="topbar">
+    <img class="lockup sm js-logo" alt="Bioscript by Qaly Health Shield">
+    <span class="spacer"></span>
+    <button class="btn btn-secondary btn-ghost" id="ndaBack" data-t="ndaBack">Back</button>
+  </header>
+  <div class="form-scroll" id="ndaScroll">
+    <div class="form-wrap">
+      <div class="f-head">
+        <h2 class="headline" id="ndaTitle"></h2>
+        <p class="lead" data-t="ndaLead"></p>
+      </div>
+      <div class="nda-doc" id="ndaDoc" dir="ltr"></div>
+      <div class="sig-box">
+        <span class="label" data-t="ndaSignHere"></span>
+        <p class="sig-note" data-t="ndaAgree"></p>
+        <div class="sig-pad"><canvas id="sigPad" aria-label="Signature"></canvas><span class="sig-hint" id="sigHint" data-t="ndaHint"></span></div>
+        <div class="sig-row"><span class="sig-who" id="sigWho"></span><button type="button" class="link-btn" id="sigClear" data-t="ndaClear"></button></div>
+        <div class="err" id="errSig" role="alert"></div>
+        <div class="submit-row"><button type="button" class="btn btn-primary btn-xl" id="ndaSignBtn"><span data-t="ndaSign"></span> <span class="arrow js-arrow">→</span></button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="screen" id="thanks" aria-label="Thank you">
   <header class="topbar"><img class="lockup sm js-logo" alt="Bioscript by Qaly Health Shield"></header>
   <div class="t-body">
@@ -486,7 +535,7 @@ var T = {
     switchLang:'العربية', startAgain:'Start again',
     formTitle:'Visitor sign-in.', formLead:'It takes about one minute. When you finish, please take a seat.',
     secReason:'Reason for your visit', secDetails:'Your details', secHost:'Who you are visiting', secPrivacy:'Privacy',
-    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', eCheck:'Some details are missing. Please check the messages above.', fDept:'Department you are visiting', deptPick:'Choose a department', eDept:'Please choose the department you are visiting.', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
+    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', fAddress:'Address', ndaTitle:'Please sign the NDA.', ndaLead:'Please read the agreement below, then sign at the bottom with your finger.', ndaBack:'Back', ndaSignHere:'Your signature', ndaAgree:'By signing, you agree to this non-disclosure agreement.', ndaHint:'Sign here with your finger', ndaClear:'Clear', ndaSign:'Sign and finish', eSig:'Please sign in the box above.', eSigSave:'Sorry, the signature could not be saved. Please try again.', eCheck:'Some details are missing. Please check the messages above.', fDept:'Department you are visiting', deptPick:'Choose a department', eDept:'Please choose the department you are visiting.', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
     privacyText:'We keep this record to manage safety and security at our premises. It is stored securely and only authorised staff can see it. We do not share it or use it for marketing. If you add a photo of your Emirates ID, it is kept with this record. To see or correct your record, please ask at reception.',
     consentText:'I agree that Bioscript Center may keep this record for this purpose.',
     signIn:'Sign in',
@@ -505,7 +554,7 @@ var T = {
     switchLang:'English', startAgain:'البدء من جديد',
     formTitle:'تسجيل دخول الزوار.', formLead:'يستغرق ذلك دقيقة تقريبًا. بعد الانتهاء، تفضّل بالجلوس.',
     secReason:'سبب الزيارة', secDetails:'بياناتك', secHost:'الجهة التي تزورها', secPrivacy:'الخصوصية',
-    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', eCheck:'بعض البيانات ناقصة. يُرجى مراجعة الرسائل أعلاه.', fDept:'القسم الذي تزوره', deptPick:'اختر القسم', eDept:'يُرجى اختيار القسم الذي تزوره.', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
+    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', fAddress:'العنوان', ndaTitle:'يُرجى توقيع اتفاقية عدم الإفصاح.', ndaLead:'يُرجى قراءة الاتفاقية أدناه، ثم التوقيع في الأسفل بإصبعك.', ndaBack:'رجوع', ndaSignHere:'توقيعك', ndaAgree:'بتوقيعك، فإنك توافق على اتفاقية عدم الإفصاح هذه.', ndaHint:'وقّع هنا بإصبعك', ndaClear:'مسح', ndaSign:'توقيع وإنهاء', eSig:'يُرجى التوقيع في المربع أعلاه.', eSigSave:'عذرًا، تعذّر حفظ التوقيع. يُرجى المحاولة مرة أخرى.', eCheck:'بعض البيانات ناقصة. يُرجى مراجعة الرسائل أعلاه.', fDept:'القسم الذي تزوره', deptPick:'اختر القسم', eDept:'يُرجى اختيار القسم الذي تزوره.', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
     privacyText:'نحتفظ بهذا السجل لإدارة السلامة والأمن في مقرّنا. يُحفظ السجل بشكل آمن، ولا يطّلع عليه إلا الموظفون المخوّلون. لا نشاركه مع أي جهة ولا نستخدمه لأغراض تسويقية. إذا أضفت صورة لبطاقة الهوية الإماراتية، فستُحفظ مع هذا السجل. للاطلاع على سجلك أو تصحيحه، يُرجى مراجعة الاستقبال.',
     consentText:'أوافق على احتفاظ مركز بايوسكريبت بهذا السجل لهذا الغرض.',
     signIn:'تسجيل الدخول',
@@ -898,6 +947,7 @@ function updateTypeFields(){
   var eReq = eidNeeded(), lReq = licNeeded();
   $('#eidOpt').hidden = !state.type || eReq;
   $('#fldLicense').hidden = !lReq;
+  $('#fldAddress').hidden = !ndaNeeded();
   if (!eReq && $('#errEid').getAttribute('data-k') === 'eEidNeed'){ setErr($('#errEid'), null); $('#fEid').removeAttribute('aria-invalid'); }
   if (!lReq){ setErr($('#errLicense'), null); $('#fLicense').removeAttribute('aria-invalid'); }
 }
@@ -971,7 +1021,7 @@ $('#eidFile').addEventListener('change', function(){
 
 function applyLang(){
   var L = T[lang];
-  ['form','thanks'].forEach(function(id){ var s = $('#'+id); s.setAttribute('lang', lang); s.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr'); });
+  ['form','thanks','nda'].forEach(function(id){ var s = $('#'+id); s.setAttribute('lang', lang); s.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr'); });
   $$('[data-t]').forEach(function(el){
     if (el.closest('#pin,#staff,#fileModal,#confirmModal')) return;
     var k = el.getAttribute('data-t'); if (L[k] != null) el.textContent = L[k];
@@ -1002,7 +1052,7 @@ function setErr(el, msg, key){
 function startForm(l){
   lang = l || 'en';
   resetState();
-  busy = false; $('#submitBtn').disabled = false;
+  busy = false; ndaSig = null; $('#submitBtn').disabled = false; $('#ndaSignBtn').disabled = false;
   $('#visitForm').reset(); setEidPhoto(null); updateTypeFields(); $('#fDept').value = ''; $('#fDept').classList.add('is-empty');
   ['#fName','#fMobile','#fEid','#fEmail','#fLicense','#fDept'].forEach(function(s){ $(s).removeAttribute('aria-invalid'); });
   $$('#form .err').forEach(function(e){ setErr(e, null); });
@@ -1085,7 +1135,7 @@ $('#visitForm').addEventListener('submit', function(e){
   var L = T[lang], first = null;
   setErr($('#errSubmit'), null);
   var name = $('#fName').value.replace(/\s+/g,' ').trim(), mobile = mobileClean($('#fMobile').value).trim(),
-      eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim(), license = licNeeded() ? licClean($('#fLicense').value) : '', dept = $('#fDept').value;
+      eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim(), license = licNeeded() ? licClean($('#fLicense').value) : '', dept = $('#fDept').value, address = ndaNeeded() ? $('#fAddress').value.replace(/\s+/g,' ').trim().slice(0, 160) : '';
   function bad(inputSel, errSel, key){
     setErr($(errSel), L[key], key);
     if (inputSel) $(inputSel).setAttribute('aria-invalid', 'true');
@@ -1102,6 +1152,8 @@ $('#visitForm').addEventListener('submit', function(e){
   if (state.host == null) bad(null, '#errHost', 'eHost');
   if (!$('#fConsent').checked) bad(null, '#errConsent', 'eConsent');
   if (first){
+    if (current === 'nda') show('form');
+    ndaSig = null;
     setErr($('#errSubmit'), L.eCheck, 'eCheck');
     var box = first.closest('.sec, .fld') || first;
     box.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
@@ -1112,26 +1164,33 @@ $('#visitForm').addEventListener('submit', function(e){
   var rec = {
     id: now.getTime().toString(36) + Math.random().toString(36).slice(2,6),
     ref: pad(now.getMonth()+1) + pad(now.getDate()) + '-' + Math.random().toString(36).slice(2,6).toUpperCase(),
-    ts: now.toISOString(), type: state.type, name: name, mobile: mobile, eid: eid, email: email, company: company, license: license, dept: dept, eidPhoto: !!eidPhoto,
+    ts: now.toISOString(), type: state.type, name: name, mobile: mobile, eid: eid, email: email, company: company, license: license, dept: dept, address: address, eidPhoto: !!eidPhoto,
     host: host.en, hostAr: host.ar || '', lang: lang, consent: true, device: settings.ipadName
   };
-  busy = true; $('#submitBtn').disabled = true;
-  (eidPhoto ? withTimeout(photoDb.put(rec.id, eidPhoto.bytes), 8000) : Promise.resolve()).then(function(){
+  if (ndaNeeded() && !ndaSig){ openNda(rec); return; }
+  var sigBytes = ndaNeeded() ? ndaSig : null; ndaSig = null;
+  if (sigBytes) rec.nda = {signed: true, at: now.toISOString(), doc: 'NDA - Bioscript'};
+  busy = true; $('#submitBtn').disabled = true; $('#ndaSignBtn').disabled = true;
+  (eidPhoto ? withTimeout(photoDb.put(rec.id, eidPhoto.bytes), 8000) : Promise.resolve())
+  .then(function(){ return sigBytes ? withTimeout(photoDb.put(rec.id + ':sig', sigBytes), 8000).catch(function(){ rec.nda.sig = bytesToDataUrl(sigBytes, 'image/png'); }) : null; })
+  .then(function(){
   records.push(rec);
   if (!store.set('bsv.records', records)){
-    records.pop(); if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){});
-    setErr($('#errConsent'), L.eSave, 'eSave');
+    records.pop(); if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){}); if (rec.nda) photoDb.del(rec.id + ':sig').catch(function(){});
+    setErr($('#errConsent'), L.eSave, 'eSave'); if (current === 'nda') setErr($('#errSig'), L.eSave, 'eSave');
     return;
   }
-  setEidPhoto(null);
+  setEidPhoto(null); sigPad.clear();
   document.activeElement && document.activeElement.blur && document.activeElement.blur();
   showThanks(rec);
-  }, function(){
+  }, function(err){
+    if (err && err.sig){ if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){}); if (current !== 'nda') show('nda'); setErr($('#errSig'), L.eSigSave, 'eSigSave'); return; }
+    if (current === 'nda') show('form');
     rec.eidPhoto = false; setEidPhoto(null);
     setErr($('#errEid'), L.ePhotoSave, 'ePhotoSave'); $('#fEid').setAttribute('aria-invalid', 'true');
     $('#fldEid').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
-  }).catch(function(err){ try { console.error(err); } catch(x){} setErr($('#errSubmit'), L.eSave || L.eCheck, 'eSave'); })
-  .then(function(){ busy = false; $('#submitBtn').disabled = false; });
+  }).catch(function(err){ try { console.error(err); } catch(x){} setErr($('#errSubmit'), L.eSave || L.eCheck, 'eSave'); if (current === 'nda') setErr($('#errSig'), L.eSave || L.eCheck, 'eSave'); })
+  .then(function(){ busy = false; $('#submitBtn').disabled = false; $('#ndaSignBtn').disabled = false; });
 });
 
 /* ---------------- thank you ---------------- */
@@ -1177,6 +1236,216 @@ $('#savePdfBtn').addEventListener('click', function(){
 });
 $('#doneBtn').addEventListener('click', function(){ goWelcome(); });
 
+var NDA_ROWS = [{"k":"title","en":"Non-disclosure agreement.","ar":"اتفاقية عدم إفصاح"},{"k":"intro","en":"This Agreement is entered into on                      in Dubai, United Arab Emirates, between:","ar":"أُبرمت هذه الاتفاقية في يوم                              في إمارة دبي، دولة الإمارات العربية المتحدة، فيما بين كلٍّ من:"},{"k":"head","en":"Parties","ar":"أطراف الاتفاقية"},{"k":"item","ne":"1.","en":"BIOSCRIPT CENTER - FZCO, Trade License No. 7664, located at B3 Building, Dubai Digital Park, Dubai Silicon Oasis, Dubai, United Arab Emirates; represented in signing hereof by Mr. Mohammed Bin Darwish Bin Mohd Bin Hussain Alahmad in his capacity as Chief Executive Officer (hereinafter the “First Party”), which term, wherever the context so requires, shall mean and include its successors, nominees or assignees.","ar":"مركز بايوسكربت - ش م ح، رخصة تجارية رقم 7664، ومقرها: مبنى B3، دبي ديجيتال بارك، واحة دبي للسيليكون، دبي، دولة الإمارات العربية المتحدة؛ ويمثلها في التوقيع على هذه الاتفاقية السيد/ محمد بن درويش بن محمد بن حسين الأحمد بصفته الرئيس التنفيذي (ويُشار إليها فيما بعد بـ«الطرف الأول»). وتعني الإشارة إلى الطرف الأول، أينما وكيفما اقتضت الحاجة في سياق هذه الاتفاقية، الطرفَ الأول ومن ينوب عنه أو يفوضه أو يعيّنه.","na":"1."},{"k":"party2","ne":"2.","en":"Name:\n\nEID / Trade License No.:\n\nAddress:\n\n(hereinafter the “Second Party”).","ar":"السادة:\n\nرقم الهوية الإماراتية / الرخصة التجارية:\n\nالعنوان:\n\n(ويُشار إليه فيما بعد بـ«الطرف الثاني»).","na":"2."},{"k":"head","en":"Preamble","ar":"تمهيد"},{"k":"item","ne":"A.","en":"The First Party enters into a contract with the Second Party on ________________.","ar":"يشرع الطرف الأول في التعاقد مع الطرف الثاني بتاريخ ________________.","na":"أ."},{"k":"item","ne":"B.","en":"WHEREAS the implementation by the Second Party of its obligations contained in the contract requires access to certain information and data which the First Party deems to be confidential information that must be preserved and not used, reused or disclosed in any manner whatsoever;","ar":"وحيث إن من متطلبات تنفيذ الطرف الثاني لالتزاماته الواردة في العقد أن يطّلع على بعض المعلومات والبيانات التي يعتبرها الطرف الأول من المعلومات السرية التي يتعيّن الحفاظ عليها وعدم استخدامها أو إعادة استخدامها أو الإفصاح عنها بأي صورة من الصور؛","na":"ب."},{"k":"item","ne":"C.","en":"WHEREAS the Parties have agreed to conclude this Agreement after signing the contract to ensure and maintain the confidentiality of such information in accordance with the terms and conditions set out herein, the Parties hereby agree as follows:","ar":"وحيث إن الطرفين قد اتفقا على إبرام هذه الاتفاقية بناءً على عقد التعيين لضمان الحفاظ على سرية هذه المعلومات، وذلك وفق الشروط والأحكام الواردة في مواد وبنود هذه الاتفاقية، فقد اتفق الطرفان على ما يلي:","na":"ج."},{"k":"head","en":"Article 1 — Use of Information","ar":"المادة (1) — استعمال المعلومات"},{"k":"item","ne":"1.1","en":"The Second Party shall treat all information assets of the First Party as confidential, irrespective of their actual classification level and regardless of how they are obtained, whether communicated or disclosed to the Second Party, learnt or accessed through any present or future relationship with the First Party, or obtained incidentally by any means whatsoever.","ar":"يتعهد الطرف الثاني بالتعامل مع كافة المعلومات الخاصة بالطرف الأول على أنها سرية، بغض النظر عن مستوى تصنيفها الفعلي، وأيًّا كانت وسيلة حصوله عليها، سواء تم تزويده بها أو الإفصاح له عنها، أو اطّلع عليها أو توصّل إليها أو علم بها بمناسبة علاقته الحالية أو المستقبلية مع الطرف الأول، أو تحصّل عليها مصادفةً بأي صورة من الصور أو بأي وسيلة من الوسائل.","na":"1.1"},{"k":"item","ne":"1.2","en":"The Second Party shall not print, copy, fax, email or otherwise distribute, in whole or in part, any documents, magnetic media or any other kind of information without the prior written consent of the First Party.","ar":"يتعهد الطرف الثاني بعدم طباعة أو نسخ أو توزيع أو إرسال أي وثائق أو مواد ممغنطة أو أي نوع من المعلومات، بشكل كلي أو جزئي وبأي وسيلة من الوسائل، دون الحصول على الموافقة الخطية للطرف الأول.","na":"1.2"},{"k":"item","ne":"1.3","en":"The Second Party agrees not to remove any information assets (tangible or virtual) owned by the First Party from the premises of the First Party without prior written approval. The Second Party shall comply with all terms and conditions of any such approved removal and shall return the information assets and all corresponding copies by the end of a pre-agreed date.","ar":"يلتزم الطرف الثاني بعدم إزالة أي أصول معلومات من موقع الطرف الأول دون الحصول على الموافقة الخطية على ذلك من الطرف الأول. وفي حال الموافقة على الإزالة، يلتزم الطرف الثاني بالانصياع لجميع الشروط والقواعد التي يضعها الطرف الأول لهذه الإزالة، وأن يعيد أصول المعلومات وجميع نسخها قبل نهاية الموعد المتفق عليه سلفًا.","na":"1.3"},{"k":"item","ne":"1.4","en":"The Second Party shall ensure that information assets owned by the First Party are used only to carry out tasks as per the contractual obligations of this Agreement.","ar":"يلتزم الطرف الثاني بمعايير الاستعمال المقبولة لدى الطرف الأول، وذلك للقيام بالمهام المناطة به حسب الالتزامات التعاقدية لهذه الاتفاقية.","na":"1.4"},{"k":"item","ne":"1.5","en":"The Second Party shall abide by all applicable regulations in this matter while carrying out tasks as per the contractual obligations of this Agreement.","ar":"يتعهد الطرف الثاني بالالتزام بجميع المهام المنوطة به حسب الالتزامات المتعاقد عليها في هذه الاتفاقية، وبكافة القوانين المعمول بها في هذا الخصوص.","na":"1.5"},{"k":"item","ne":"1.6","en":"The Second Party shall use all reasonable efforts to prevent disclosure of any information asset owned by the First Party, and shall circulate all commitments contained in this Agreement to its employees, managers, experts and advisors, and to all information recipients authorized on its part to receive information owned by the First Party. The Second Party further undertakes to ensure their compliance with the provisions of this Agreement and other existing codes, instructions and guidelines, while bearing full responsibility for any of their actions deemed contrary to the foregoing.","ar":"يتعهد الطرف الثاني بتكريس جميع الجهود الممكنة لمنع الإفصاح عن أي من أصول المعلومات المملوكة للطرف الأول، وبتعميم كافة الالتزامات الواردة في هذه الاتفاقية على عماله وموظفيه ومديريه وخبرائه ومستشاريه وجميع متلقي المعلومات المخوّلين من طرفه بتلقي المعلومات المملوكة للطرف الأول، وبضمان انصياعهم لما ورد في هذه الاتفاقية والقوانين السارية الأخرى والتعليمات والتوجيهات، مع تحمّله المسؤولية الكاملة بالتضامن معهم عن كافة ما يقومون به من أعمال يمكن اعتبارها مخالفة لما تقدّم.","na":"1.6"},{"k":"item","ne":"1.7","en":"The Second Party shall maintain a list of all authorized/proposed information recipients, to be made available to the First Party upon request.","ar":"على الطرف الثاني توفير قائمة خاصة تحمل أسماء متلقي المعلومات المخوّلين والمقترحين من طرفه، ليقدمها إلى الطرف الأول عند الطلب.","na":"1.7"},{"k":"head","en":"Article 2 — Safeguard of Proprietary Rights","ar":"المادة (2) — حماية حقوق الامتلاك"},{"k":"item","ne":"2.1","en":"The Second Party shall acknowledge the exclusive proprietary rights of the First Party over all kinds of information assets that are deemed copyrighted work or intellectual property of the First Party.","ar":"يُقرّ الطرف الثاني بملكية الطرف الأول الفكرية الكاملة والحصرية لجميع ما لديه من أنواع أصول المعلومات.","na":"2.1"},{"k":"item","ne":"2.2","en":"The Second Party shall ensure that all kinds of copyrighted work or intellectual property of the First Party are used only for official purposes. The Second Party shall ensure that such information assets are not used for personal gain of any nature whatsoever without the prior written consent of the First Party.","ar":"يتعهد الطرف الثاني بعدم استخدام الأعمال المسجلة باسم الطرف الأول وفق قانون الملكية الفكرية، أو أي أعمال تُعد ملكية فكرية للطرف الأول ولو لم يتم تسجيلها، إلا في المجال الرسمي فقط. ويضمن الطرف الثاني عدم استخدام هذه الأصول لأغراض التكسّب الشخصي بأي صورة من الصور دون الحصول على موافقة خطية مسبقة من الطرف الأول في هذا الشأن.","na":"2.2"},{"k":"item","ne":"2.3","en":"The Second Party shall ensure that all kinds of copyrighted work or intellectual property of the First Party are handled appropriately and are not disclosed to any other unauthorized party, including competitors of the First Party.","ar":"يلتزم الطرف الثاني بأن يحفظ جميع الأعمال التي تُعد ملكية فكرية للطرف الأول بالشكل المناسب، وألا يفصح عنها لأي جهة كانت، وعلى وجه الخصوص منافسي الطرف الأول.","na":"2.3"},{"k":"item","ne":"2.4","en":"The Second Party shall refrain from unauthorized reverse engineering, decompiling, disassembling or copying of any copyrighted work or intellectual property of the First Party to which conditional access is granted for day-to-day activities.","ar":"يتعهد الطرف الثاني بالامتناع عن أي نسخ أو هندسة عكسية أو تفكيك أو إعادة بناء برمجي لأيٍّ من الأعمال المسجلة وفق قانون الملكية الفكرية أو أعمال الملكية الفكرية الخاصة بالطرف الأول، والتي مُنح الطرف الثاني صلاحية وصول محدودة إليها للنشاطات اليومية.","na":"2.4"},{"k":"item","ne":"2.5","en":"The Second Party shall ensure that copyrighted work or intellectual property is not used in a derogatory manner and, in the event of such occurrence, the Second Party shall provide complete support to the First Party in re-establishing the proprietary rights.","ar":"يتعهد الطرف الثاني ويلتزم بألا تُستخدم أعمال الطرف الأول المسجلة حسب الأصول وفق قانون الملكية الفكرية، أو أعمال الملكية الفكرية الخاصة بالطرف الأول، بطريقة منافية للأصول. وفي حال وقوع ذلك، يتوجب على الطرف الثاني توفير الدعم الكامل للطرف الأول في استرداد حقوق الامتلاك.","na":"2.5"},{"k":"item","ne":"2.6","en":"The Second Party shall always, when called upon by the First Party, whether during the contractual period of this Agreement or thereafter, ensure that the proprietary rights to the intellectual property of the First Party are not misused in any manner whatsoever.","ar":"يتعهد الطرف الثاني، خلال الفترة التعاقدية أو بعد انقضائها، وكلما دعاه الطرف الأول إلى ذلك، بأن يحفظ حقوق الامتلاك الخاصة بالطرف الأول من أي إساءة استخدام تحت أي ظرف أو طبيعة كانت.","na":"2.6"},{"k":"item","ne":"2.7","en":"The Second Party acknowledges that, during the contract, the First Party does not grant any license, explicitly or implicitly, for any trademark, patent, copyright, trade secret or any other intellectual property to which it holds the exclusive rights.","ar":"يُقرّ الطرف الثاني بأنه، وخلال فترة التعاقد، لا يمنحه الطرف الأول أي ترخيص، سواء بشكل ضمني أو صريح، لأيٍّ من العلامات التجارية أو براءات الاختراع أو حقوق الملكية الفكرية أو الأسرار التجارية أو أي ممتلكات فكرية أيًّا كان نوعها، إذ يحوز الطرف الأول كافة ما يرد عليها من حقوق بشكل حصري.","na":"2.7"},{"k":"head","en":"Article 3 — Return of Assets (Tangible or Virtual)","ar":"المادة (3) — إرجاع الأصول"},{"k":"item","ne":"3.1","en":"The Second Party shall acknowledge that its obligations towards the confidentiality, integrity and availability of the information assets of the First Party shall continue even after the expiry of the contractual obligations of this Agreement, until such time as the information is made public through lawful means.","ar":"يعترف الطرف الثاني بالتزامه نحو مراعاة سرية أصول المعلومات الخاصة بالطرف الأول ونزاهتها وتوافرها، على أن يستمر هذا الالتزام حتى بعد انتهاء الالتزام التعاقدي لهذه الاتفاقية، وإلى حين أن تصبح هذه المعلومات عامة عبر القنوات القانونية المعتمدة.","na":"3.1"},{"k":"head","en":"Article 4 — Compliance","ar":"المادة (4) — الامتثال"},{"k":"item","ne":"4.1","en":"The Second Party acknowledges that any breach of the provisions of this Agreement may render it liable to any injunction from the First Party as may be necessary to enforce the terms and conditions of this Agreement.","ar":"يُقرّ الطرف الثاني بأنه في حال وقوع أي خرق لبنود هذه الاتفاقية، فإنه يُعتبر مسؤولًا مباشرةً أمام الطرف الأول وفق ما تقتضيه الحاجة لإنفاذ شروط وأحكام هذه الاتفاقية.","na":"4.1"},{"k":"item","ne":"4.2","en":"Notwithstanding the above, the Second Party acknowledges that any breach of the provisions of this Agreement may also lead to legal proceedings before a competent court to enforce the rights of the First Party, including all compensation, interest, costs, legal fees and charges deemed appropriate by the First Party.","ar":"بغض النظر عمّا سبق، يُقرّ الطرف الثاني بأنه في حال خرقه لأيٍّ من بنود هذه الاتفاقية، فإن الأمر قد يؤدي إلى ملاحقات قانونية أمام المحاكم المختصة من أجل إنفاذ حقوق الطرف الأول، والتي تشمل كافة التعويضات والفوائد والنفقات والرسوم والأتعاب القانونية التي يراها الطرف الأول مناسبة.","na":"4.2"},{"k":"item","ne":"4.3","en":"The Second Party shall take reasonable steps to enforce the obligations imposed, or required to be imposed, by this Agreement by prosecuting, at its own cost, any breach or threatened breach of the provisions of this Agreement by a person to whom it has disclosed confidential information or any other party.","ar":"يتعهد الطرف الثاني باتخاذ الخطوات المناسبة لإنفاذ الالتزامات الملقاة على عاتقه أو التي تمليها عليه هذه الاتفاقية، وذلك بقيامه بالملاحقة القانونية، وعلى نفقته الخاصة، لأي خرق أو خرق محتمل لبنود هذه الاتفاقية من قِبل أي شخص أو جهة قام الطرف الثاني بالإفصاح لها عن معلومات سرية.","na":"4.3"},{"k":"head","en":"Article 5 — Disclaimer","ar":"المادة (5) — إخلاء المسؤولية"},{"k":"item","ne":"5.1","en":"The Second Party may, however, disclose the information only to authorized recipients (its own consultants and contractors) who have a need to know as per the contractual obligations of this Agreement.","ar":"يمكن للطرف الثاني الإفصاح عن المعلومات فقط إلى المتلقين المخوّلين (مستشاريه ومتعاقديه) ممن لديهم حاجة للاطلاع، وذلك وفقًا للالتزامات التعاقدية التي تنص عليها هذه الاتفاقية.","na":"5.1"},{"k":"item","ne":"5.2","en":"The non-disclosure provisions of this Agreement shall not apply to information assets that have already been made available to the public through lawful means, or that have been voluntarily classified as public by the First Party.","ar":"لا تنطبق أحكام عدم الإفصاح على المعلومات التي تم توفيرها للعامة من خلال الوسائل المشروعة، أو التي عمد الطرف الأول إلى تصنيفها طوعًا بأنها عامة، أو التي صرّح بها الطرف الأول على أنها عامة.","na":"5.2"},{"k":"item","ne":"5.3","en":"The Second Party may disclose information without any breach of this Agreement if such disclosure is due to the application of law or the execution of a judicial ruling by a competent court.","ar":"يجوز للطرف الثاني الإفصاح عن المعلومات دون أن يُعد ذلك خرقًا لهذه الاتفاقية، إذا كان هذا الإفصاح ناتجًا عن تطبيق القانون أو تنفيذًا لقرار صادر عن محكمة مختصة.","na":"5.3"},{"k":"item","ne":"5.4","en":"Each Party acknowledges that this Agreement is valid and legally binding, and must be executed by the authorized representatives as per the provisions contained herein.","ar":"يُقرّ كلا الطرفين بأن هذه الاتفاقية سارية وملزمة قانونًا، ويجب العمل على إنفاذها بواسطة ممثلين مخوّلين طبقًا لما اشتملت عليه من أحكام.","na":"5.4"},{"k":"item","ne":"5.5","en":"The Parties acknowledge that the terms of this Agreement will continue to apply throughout the validity of the contract, even after any modification to the ensuing contractual obligation or after the end of such obligation.","ar":"يُقرّ كلا الطرفين بأن بنود هذه الاتفاقية ستظل سارية طيلة سريان العقد، حتى بعد وقوع أي تعديل على الالتزام التعاقدي الناشئ عنه أو بعد انتهاء هذا الالتزام.","na":"5.5"},{"k":"item","ne":"5.6","en":"If any one or more terms of this Agreement is declared invalid, illegal or unenforceable, such determination shall not affect the overall purpose of this Agreement and shall not interfere with the application and enforcement of the remaining terms.","ar":"في حال اعتبار بند أو أكثر من بنود هذه الاتفاقية غير صالح أو غير قانوني أو غير قابل للتطبيق، فإن ذلك لن يؤثر على الغرض الكلي للاتفاقية، ولن يتعارض مع تطبيق وإنفاذ البنود الأخرى المتبقية.","na":"5.6"},{"k":"item","ne":"5.7","en":"Any amendment, modification, alteration, cancellation or renewal of this Agreement shall be made only in writing by the concerned Parties.","ar":"لا يتم إجراء أي تعديل أو حذف أو إضافة أو إلغاء لهذه الاتفاقية إلا بالموافقة الخطية للطرفين.","na":"5.7"},{"k":"item","ne":"5.8","en":"This Agreement shall be construed and implemented, and any ensuing jurisdictional or non-jurisdictional disputes shall be settled, in accordance with the laws in effect in the United Arab Emirates as applied in the Emirate of Dubai.","ar":"تُفسَّر هذه الاتفاقية ويُعمل بها، ويُفصل فيما قد ينشأ عنها من خلافات ونزاعات قضائية وغير قضائية، وفقًا للقوانين السارية في دولة الإمارات العربية المتحدة وإمارة دبي.","na":"5.8"},{"k":"item","ne":"5.9","en":"In the event of any dispute or difference arising between the Parties to this Agreement, whether during the contractual period or after its termination, and it becomes necessary to resort to a court of law, the Courts of Dubai alone shall have jurisdiction to entertain any such legal proceedings. The Parties hereby waive their right to object to such jurisdiction or to claim the jurisdiction of any other courts.","ar":"في حال وقوع أي منازعة أو اختلاف بين طرفي هذه الاتفاقية، سواء خلال الفترة التعاقدية أو بعد انتهائها، ودعت الحاجة إلى اللجوء إلى المحكمة، فإن محاكم دبي تكون وحدها المختصة والمخوّلة بالبت في هذا الشأن، وتمتلك الصلاحية للنظر في هذه الملاحقة القانونية، ويتنازل الطرفان من الآن عن الادعاء أو الدفع باختصاص أي محاكم أخرى.","na":"5.9"},{"k":"head","en":"Article 6 — Language","ar":"المادة (6) — اللغة"},{"k":"item","ne":"6.1","en":"This Agreement is made in the Arabic and English languages. The Articles in English are translations of their Arabic counterparts and together constitute single provisions and obligations of equal authenticity, unless any part thereof contradicts the interpretation of the Arabic text. In the event of any contradiction between the interpretations of the two texts, the Arabic text shall prevail.","ar":"حُرّرت هذه الاتفاقية باللغتين العربية والإنجليزية، وتُعد المواد المدرجة باللغة الإنجليزية ترجمةً لقريناتها باللغة العربية، وتشكّل في مجملها أحكامًا والتزامات واحدة لها ذات الحجية، عدا ما يتعارض منها مع تفسير النص العربي. وفي حال التعارض بين تفسير النص العربي وقرينه الأجنبي، يكون النص العربي هو المرجّح في مجال التفسير.","na":"6.1"},{"k":"close","en":"By signing below, both Parties agree to all the above terms and conditions of this Agreement and acknowledge their commitment to implement the same in accordance with the provisions contained herein.","ar":"يوافق الطرفان على جميع الشروط والبنود المذكورة أعلاه، ويُقرّان بتنفيذها طبقًا لما اشتملت عليه من أحكام، وعلى ذلك جرى التوقيع."},{"k":"sign","en":"توقيع الطرف الثاني\nSigned for the Second Party\nMr./Ms.\nSignature: ________________\nDate:","ar":"توقيع الطرف الأول\nSigned for the First Party\nالسيد/ محمد بن درويش بن محمد بن حسين الأحمد\nMr. Mohammed Bin Darwish Bin Mohd Bin Hussain Alahmad\nالوظيفة/ الرئيس التنفيذي\nOccupation: Chief Executive Officer\nالتوقيع:\nالتاريخ:"}];
+/* =====================================================================
+   NDA — the visitor reads the agreement (English + Arabic, word for word
+   from "NDA - Bioscript.docx"), signs with a finger, and the signed copy
+   is added to the visitor's PDF. Kept on this iPad only.
+   ===================================================================== */
+var NDA_REQ = EID_REQ;                         // same 5 reasons as the Emirates ID rule
+function ndaNeeded(){ return !!(state && state.type && NDA_REQ[state.type]); }
+var AR_MON = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function fDateAr(d){ return d.getDate() + ' ' + AR_MON[d.getMonth()] + ' ' + d.getFullYear(); }
+function bidiIso(v){ return '\u2068' + v + '\u2069'; }   // keeps names, ID numbers and addresses in the right order in either language
+function ndaFillLines(t, vals){
+  var i = 0;
+  return t.split('\n').filter(function(l){ return l.trim(); }).map(function(l){
+    return (/:\s*$/.test(l) && i < vals.length) ? l.replace(/\s*$/, ' ') + vals[i++] : l;
+  }).join('\n');
+}
+function ndaRows(r){
+  var d = new Date((r.nda && r.nda.at) || r.ts), en = fDate(d), ar = fDateAr(d);
+  var ltr = function(v){ return '\u2066' + v + '\u2069'; };   // ID and licence numbers always read left to right
+  var idEn = [r.eid ? ltr(r.eid) : (r.eidPhoto ? 'Emirates ID photo attached' : ''), r.license ? 'Trade License ' + ltr(r.license) : ''].filter(Boolean).join(' / ') || '–';
+  var idAr = [r.eid ? ltr(r.eid) : (r.eidPhoto ? 'صورة الهوية مرفقة' : ''), r.license ? 'رخصة تجارية ' + ltr(r.license) : ''].filter(Boolean).join(' / ') || '–';
+  return NDA_ROWS.filter(function(o){ return o.k !== 'sign'; }).map(function(o){
+    var x = {k: o.k, en: o.en, ar: o.ar, ne: o.ne || '', na: o.na || ''};
+    if (x.k === 'intro'){ x.en = x.en.replace(/on\s{2,}in/, 'on ' + en + ' in'); x.ar = x.ar.replace(/يوم\s{2,}في/, 'يوم ' + ar + ' في'); }
+    if (x.k === 'party2'){ x.en = ndaFillLines(x.en, [bidiIso(r.name), idEn, bidiIso(r.address || '–')]); x.ar = ndaFillLines(x.ar, [bidiIso(r.name), idAr, bidiIso(r.address || '–')]); }
+    x.en = x.en.replace(/_{4,}/g, en); x.ar = x.ar.replace(/_{4,}/g, ar);
+    return x;
+  });
+}
+function ndaSignLines(){ for (var i=0;i<NDA_ROWS.length;i++) if (NDA_ROWS[i].k === 'sign') return NDA_ROWS[i]; return {en:'', ar:''}; }
+function renderNda(r){
+  $('#ndaDoc').innerHTML = ndaRows(r).map(function(o){
+    var en = esc(o.en).replace(/\n/g, '<br>'), ar = esc(o.ar).replace(/\n/g, '<br>');
+    if (o.k === 'title') en = dotify(o.en, false);
+    return '<div class="nda-row k-' + o.k + '"><div class="n-en">' + esc(o.ne) + '</div><div class="t-en" lang="en" dir="ltr">' + en +
+      '</div><div class="t-ar" lang="ar" dir="rtl">' + ar + '</div><div class="n-ar" dir="rtl">' + esc(o.na) + '</div></div>';
+  }).join('');
+}
+
+/* ---------------- signature pad ---------------- */
+var sigPad = (function(){
+  var cv = $('#sigPad'), ctx = cv.getContext('2d'), strokes = [], cur = null, len = 0, down = false;
+  function rect(){ return cv.getBoundingClientRect(); }
+  function size(){
+    var r = rect(), dpr = Math.max(1, window.devicePixelRatio || 1); if (!r.width) return;
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); redraw();
+  }
+  function pen(c, w){ c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#021A91'; c.lineWidth = w; }
+  function paint(c, W, H, w){
+    pen(c, w);
+    strokes.forEach(function(s){
+      c.beginPath();
+      s.forEach(function(p, i){ var x = p.x * W, y = p.y * H; if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+      if (s.length === 1) c.lineTo(s[0].x * W + .5, s[0].y * H);
+      c.stroke();
+    });
+  }
+  function redraw(){ var r = rect(); ctx.clearRect(0, 0, r.width, r.height); paint(ctx, r.width, r.height, 2.6); $('#sigHint').hidden = strokes.length > 0; }
+  function at(e){ var r = rect(); return {x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))}; }
+  cv.addEventListener('pointerdown', function(e){
+    e.preventDefault(); down = true; try { cv.setPointerCapture(e.pointerId); } catch(x){}
+    cur = [at(e)]; strokes.push(cur); redraw(); setErr($('#errSig'), null);
+  });
+  cv.addEventListener('pointermove', function(e){
+    if (!down) return; e.preventDefault();
+    var r = rect(), p = at(e), q = cur[cur.length - 1];
+    len += Math.hypot((p.x - q.x) * r.width, (p.y - q.y) * r.height); cur.push(p);
+    pen(ctx, 2.6); ctx.beginPath(); ctx.moveTo(q.x * r.width, q.y * r.height); ctx.lineTo(p.x * r.width, p.y * r.height); ctx.stroke();
+  });
+  ['pointerup', 'pointercancel'].forEach(function(ev){ cv.addEventListener(ev, function(){ down = false; }); });
+  window.addEventListener('resize', function(){ if (current === 'nda') size(); });
+  return {
+    size: size,
+    clear: function(){ strokes = []; len = 0; cur = null; redraw(); },
+    signed: function(){ return strokes.length > 0 && len >= 40; },
+    png: function(){
+      var r = rect(), W = 900, H = Math.max(150, Math.round(W * (r.height || 220) / (r.width || 900))), c = document.createElement('canvas');
+      c.width = W; c.height = H; paint(c.getContext('2d'), W, H, 4.5);
+      return new Promise(function(res, rej){
+        if (c.toBlob) c.toBlob(function(b){ if (!b) return rej(new Error('png')); var fr = new FileReader(); fr.onload = function(){ res(new Uint8Array(fr.result)); }; fr.onerror = rej; fr.readAsArrayBuffer(b); }, 'image/png');
+        else { var s = atob(c.toDataURL('image/png').split(',')[1]), u = new Uint8Array(s.length); for (var i=0;i<s.length;i++) u[i] = s.charCodeAt(i); res(u); }
+      });
+    }
+  };
+})();
+
+var ndaSig = null;
+function openNda(rec){
+  var L = T[lang];
+  renderNda(rec);
+  sigPad.clear(); setErr($('#errSig'), null);
+  $('#sigWho').textContent = bidiIso(rec.name) + '  ·  ' + (lang === 'ar' ? fDateAr(new Date()) : fDate(new Date()));
+  var s = $('#nda'); s.setAttribute('lang', lang); s.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  setDisplay($('#ndaTitle'), L.ndaTitle, lang);
+  show('nda'); $('#ndaScroll').scrollTop = 0;
+  requestAnimationFrame(function(){ sigPad.size(); });
+  armIdle();
+}
+$('#ndaBack').addEventListener('click', function(){ show('form'); armIdle(); });
+$('#sigClear').addEventListener('click', function(){ sigPad.clear(); });
+$('#ndaSignBtn').addEventListener('click', function(){
+  if (busy) return;
+  var L = T[lang];
+  if (!sigPad.signed()){ setErr($('#errSig'), L.eSig, 'eSig'); return; }
+  setErr($('#errSig'), null);
+  sigPad.png().then(function(bytes){
+    ndaSig = bytes;
+    $('#visitForm').dispatchEvent(new Event('submit', {cancelable: true}));
+  }, function(){ setErr($('#errSig'), L.eSigSave, 'eSigSave'); });
+});
+
+/* ---------------- NDA pages in the visitor PDF ---------------- */
+function bytesToDataUrl(u, type){ var s = ''; for (var i=0;i<u.length;i+=8192) s += String.fromCharCode.apply(null, u.subarray(i, i + 8192)); return 'data:' + type + ';base64,' + btoa(s); }
+function loadSig(r){
+  if (!r || !r.nda) return Promise.resolve(null);
+  if (r.nda.sig) return loadImg(r.nda.sig).catch(function(){ return null; });   // kept with the record when photo storage was not available
+  return photoDb.get(r.id + ':sig').then(function(b){
+    if (!b) return null;
+    var url = URL.createObjectURL(new Blob([b], {type: 'image/png'}));
+    return loadImg(url).then(function(img){ return img; }, function(){ return null; }).then(function(img){ setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){} }, 2000); return img; });
+  }).catch(function(){ return null; });
+}
+function ndaPlan(cv, r){
+  if (!r || !r.nda) return null;
+  var W = 595, H = 842, ctx = page(cv, W, H), items = [];
+  ndaRows(r).forEach(function(o){
+    if (o.k === 'title') return;
+    var head = o.k === 'head', fs = head ? 8.4 : 7.4, lh = head ? 12 : 10.2, wEn = o.ne ? 222 : 248, wAr = o.na ? 222 : 248;
+    font(ctx, fs, head ? 700 : 400);
+    var le = [], la = [];
+    o.en.split('\n').forEach(function(p){ le = le.concat(wrap(ctx, p, wEn)); });
+    ctx.save(); try { ctx.direction = 'rtl'; } catch(e){}
+    o.ar.split('\n').forEach(function(p){ la = la.concat(wrap(ctx, p, wAr)); });
+    ctx.restore();
+    items.push({o: o, le: le, la: la, fs: fs, lh: lh, head: head, h: Math.max(le.length, la.length) * lh + (head ? 12 : 7)});
+  });
+  var TOP1 = 132, TOP = 100, BOTTOM = H - 74, SIGH = 186, pages = [[]], y = TOP1;
+  items.forEach(function(it, i){
+    var need = it.h + (it.head && items[i+1] ? items[i+1].h : 0);
+    if (y + need > BOTTOM && pages[pages.length-1].length){ pages.push([]); y = TOP; }
+    it.y = y; pages[pages.length-1].push(it); y += it.h;
+  });
+  if (y + SIGH > BOTTOM){ pages.push([]); y = TOP; }
+  return {pages: pages, sigY: y + 6};
+}
+function arText(ctx, s, xr, y, size, weight, color){
+  ctx.save(); try { ctx.direction = 'rtl'; } catch(e){}
+  font(ctx, size, weight); ctx.fillStyle = color || '#333A48'; ctx.textAlign = 'right'; ctx.fillText(s, xr, y);
+  ctx.restore();
+}
+function ndaPages(cv, W, H, r, logo, sig, plan, start, total){
+  if (!plan) return Promise.resolve([]);
+  var out = [], chain = Promise.resolve();
+  plan.pages.forEach(function(items, pi){
+    chain = chain.then(function(){
+      var ctx = page(cv, W, H);
+      header(ctx, logo, W);
+      if (pi === 0){
+        title(ctx, 'Non-disclosure agreement', 36, 112, 18);
+        arText(ctx, 'اتفاقية عدم إفصاح', W - 36, 112, 18, 700, '#021A91');
+      } else {
+        txt(ctx, 'Non-disclosure agreement  ·  ' + bidiIso(r.name) + '  ·  Reference ' + r.ref, 36, 84, {size: 8, max: W - 72});
+      }
+      items.forEach(function(it){
+        var o = it.o, y = it.y + it.lh - 2, col = it.head ? '#021A91' : '#333A48';
+        font(ctx, it.fs, it.head ? 700 : 400); ctx.fillStyle = col; ctx.textAlign = 'left';
+        if (o.ne) ctx.fillText(o.ne, 36, y);
+        var xe = o.ne ? 62 : 36;
+        it.le.forEach(function(l, i){ ctx.fillText(l, xe, y + i * it.lh); });
+        ctx.save(); try { ctx.direction = 'rtl'; } catch(e){}
+        font(ctx, it.fs, it.head ? 700 : 400); ctx.fillStyle = col; ctx.textAlign = 'right';
+        var xa = o.na ? W - 62 : W - 36;
+        it.la.forEach(function(l, i){ ctx.fillText(l, xa, y + i * it.lh); });
+        if (o.na) ctx.fillText(o.na, W - 36, y);
+        ctx.restore();
+        if (it.head){ ctx.fillStyle = '#B9DAF1'; ctx.fillRect(36, it.y + it.h - 6, W - 72, .6); }
+      });
+      if (pi === plan.pages.length - 1) ndaSignBlock(ctx, plan.sigY, W, r, sig);
+      footer(ctx, W, H, start + pi, total);
+      return toJpeg(cv).then(function(j){ out.push(j); });
+    });
+  });
+  return chain.then(function(){ return out; });
+}
+function ndaSignBlock(ctx, y, W, r, sig){
+  var d = new Date(r.nda.at), half = (W - 72 - 14) / 2, xl = 36, xr = 36 + half + 14, h = 150;
+  var S = ndaSignLines(), left = S.en.split('\n'), right = S.ar.split('\n');
+  ctx.fillStyle = '#E8F4FC'; ctx.fillRect(xl, y, half, h); ctx.fillRect(xr, y, half, h);
+  // Second Party: the visitor
+  arText(ctx, left[0] || '', xl + half - 12, y + 18, 8.5, 700, '#021A91');
+  txt(ctx, left[1] || 'Signed for the Second Party', xl + 12, y + 18, {size: 8.5, weight: 700, color: '#021A91'});
+  txt(ctx, (left[2] || 'Mr./Ms.') + ' ' + r.name, xl + 12, y + 36, {size: 9.5, weight: 700, color: '#021A91', max: half - 24});
+  txt(ctx, 'Signature:', xl + 12, y + 54, {size: 8.5});
+  if (sig){
+    var bw = half - 24, bh = 62, k = Math.min(bw / sig.naturalWidth, bh / sig.naturalHeight);
+    ctx.drawImage(sig, xl + 12, y + 60, sig.naturalWidth * k, sig.naturalHeight * k);
+  }
+  ctx.fillStyle = '#B9DAF1'; ctx.fillRect(xl + 12, y + 124, half - 24, .6);
+  txt(ctx, 'Date: ' + fDate(d) + ', ' + fTime(d), xl + 12, y + 140, {size: 8.5});
+  // First Party: shown as written in the agreement (signed by the company separately)
+  var ry = y + 18;
+  right.forEach(function(l){
+    if (/[؀-ۿ]/.test(l)) arText(ctx, l, xr + half - 12, ry, 8.2, ry === y + 18 ? 700 : 400, ry === y + 18 ? '#021A91' : '#333A48');
+    else txt(ctx, l, xr + 12, ry, {size: 8.2, weight: /^Signed for/.test(l) ? 700 : 400, color: /^Signed for/.test(l) ? '#021A91' : '#333A48', max: half - 24});
+    ry += 15;
+  });
+  txt(ctx, 'Signed electronically on ' + (r.device || settings.ipadName) + ' on ' + fDate(d) + ' at ' + fTime(d) + '.  Reference ' + r.ref + '.', 36, y + h + 16, {size: 7.6, color: '#626C7C', max: W - 72});
+}
+
 /* ---------------- idle / privacy reset ---------------- */
 var idleTimer = null, idleCount = null, idleLeft = 0;
 function clearTimers(){
@@ -1185,11 +1454,11 @@ function clearTimers(){
 }
 function armIdle(){
   clearTimeout(idleTimer);
-  if (current !== 'form') return;
+  if (current !== 'form' && current !== 'nda') return;
   idleTimer = setTimeout(function(){
     idleLeft = 20; $('#idleModal').classList.add('show'); tickIdle();
     idleCount = setInterval(tickIdle, 1000);
-  }, 90000);
+  }, current === 'nda' ? 180000 : 90000);
 }
 function tickIdle(){
   $('#idleText').textContent = fill(T[lang].idleText, {n: idleLeft});
@@ -1199,11 +1468,12 @@ $('#idleStay').addEventListener('click', function(){ clearInterval(idleCount); $
 $('#idleReset').addEventListener('click', function(){ goWelcome(); });
 ['pointerdown','keydown','input'].forEach(function(ev){
   document.addEventListener(ev, function(){
-    if (current === 'form' && !$('#idleModal').classList.contains('show')) armIdle();
+    if ((current === 'form' || current === 'nda') && !$('#idleModal').classList.contains('show')) armIdle();
     if (current === 'staff' || current === 'pin') armStaff();
   }, true);
 });
 function goWelcome(){
+  ndaSig = null; try { sigPad.clear(); } catch(e){}
   $('#visitForm').reset(); resetState();
   $$('.modal').forEach(function(m){ m.classList.remove('show'); });
   show('welcome');
@@ -1319,7 +1589,7 @@ function renderStaff(){
     list.map(function(r){
       var d = new Date(r.ts);
       return '<tr><td class="nw"><div>' + fDate(d) + '</div><div class="s">' + fTime(d) + '</div></td>' +
-        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + '</td>' +
+        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + (r.nda ? '<div class="s">NDA signed</div>' : '') + '</td>' +
         '<td class="nw" dir="ltr">' + esc(r.mobile) + '</td><td class="hide-sm">' + esc(r.company || '–') + (r.license ? '<div class="s">Trade license ' + esc(r.license) + '</div>' : '') + '</td>' +
         '<td>' + esc(typeLabel(r.type)) + '</td><td>' + esc(r.dept ? deptLabel(r.dept) : '–') + '</td><td class="hide-sm">' + esc(r.host) + '</td>' +
         '<td><button class="btn btn-secondary pdf" data-id="' + esc(r.id) + '">PDF</button></td></tr>';
@@ -1523,7 +1793,7 @@ function loadIdPhoto(r){
     return loadImg(url).then(function(img){ return img; }, function(){ return null; }).then(function(img){ setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){} }, 2000); return img; });
   }).catch(function(){ return null; });
 }
-function idPage(cv, W, H, r, logo, photo){
+function idPage(cv, W, H, r, logo, photo, total){
   if (!photo) return Promise.resolve(null);
   var ctx = page(cv, W, H);
   header(ctx, logo, W);
@@ -1533,12 +1803,12 @@ function idPage(cv, W, H, r, logo, photo){
   var w = photo.naturalWidth * k, h = photo.naturalHeight * k;
   ctx.drawImage(photo, 36, 172, w, h);
   ctx.strokeStyle = '#B9DAF1'; ctx.lineWidth = .8; ctx.strokeRect(36, 172, w, h);
-  footer(ctx, W, H, 2, 2);
+  footer(ctx, W, H, 2, total || 2);
   return toJpeg(cv);
 }
 function makeRecordPdf(r){
   var W = 595, H = 842, cv = document.createElement('canvas'), d = new Date(r.ts);
-  return Promise.all([loadImg(LOGO_SRC), loadIdPhoto(r)]).then(function(a){ var logo = a[0], photo = a[1];
+  return Promise.all([loadImg(LOGO_SRC), loadIdPhoto(r), loadSig(r)]).then(function(a){ var logo = a[0], photo = a[1], sig = a[2], plan = ndaPlan(cv, r), total = 1 + (photo ? 1 : 0) + (plan ? plan.pages.length : 0);
     var ctx = page(cv, W, H);
     header(ctx, logo, W);
     title(ctx, 'Visitor record', 36, 124, 24);
@@ -1547,19 +1817,20 @@ function makeRecordPdf(r){
       ['Date', fDate(d)], ['Time signed in', fTime(d)],
       ['Full name', r.name], ['Mobile number', r.mobile],
       ['Emirates ID', r.eid || (r.eidPhoto ? 'Photo on page 2' : '–')],
-      ['Email', r.email || '–'], ['Company or organisation', r.company || '–'], ['Trade license', r.license || '–'],
+      ['Email', r.email || '–'], ['Company or organisation', r.company || '–'], ['Trade license', r.license || '–'], ['Address', r.address || '–'],
       ['Reason for visit', typeLabel(r.type)], ['Department', r.dept ? deptLabel(r.dept) : '–'], ['Visiting', r.host],
-      ['Form language', r.lang === 'ar' ? 'Arabic' : 'English'], ['iPad', r.device || settings.ipadName]
+      ['Form language', r.lang === 'ar' ? 'Arabic' : 'English'], ['iPad', r.device || settings.ipadName],
+      ['NDA', r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (attached)' : 'Not required']
     ];
-    var y = 186;
+    var y = 186, STEP = fields.length > 13 ? 44 : 50;
     fields.forEach(function(f, i){
       var x = i % 2 ? 316 : 36;
       label(ctx, f[0], x, y, 7);
       txt(ctx, f[1], x, y + 18, {size:12.5, color: i === 2 ? '#021A91' : '#474747', weight: i === 2 ? 700 : 400, max: 240});
       ctx.fillStyle = '#B9DAF1'; ctx.fillRect(x, y + 28, 243, .6);
-      if (i % 2) y += 50;
+      if (i % 2) y += STEP;
     });
-    if (fields.length % 2) y += 50;
+    if (fields.length % 2) y += STEP;
     y += 14;
     font(ctx, 10);
     var lines = wrap(ctx, T.en.privacyText, W - 104), ar = r.lang === 'ar';
@@ -1578,8 +1849,8 @@ function makeRecordPdf(r){
       txt(ctx, T.ar.consentText, W - 52, ly + 49, {size:10, align:'right'});
       ctx.restore();
     }
-    footer(ctx, W, H, 1, photo ? 2 : 1);
-    return toJpeg(cv).then(function(j){ return idPage(cv, W, H, r, logo, photo).then(function(j2){ var px = [cv.width, cv.height]; cv.width = cv.height = 0; return buildPdf(j2 ? [j, j2] : [j], px[0], px[1], W, H, 'Visitor record ' + r.ref); }); });
+    footer(ctx, W, H, 1, total);
+    return toJpeg(cv).then(function(j){ return idPage(cv, W, H, r, logo, photo, total).then(function(j2){ return ndaPages(cv, W, H, r, logo, sig, plan, j2 ? 3 : 2, total).then(function(nj){ var px = [cv.width, cv.height]; cv.width = cv.height = 0; return buildPdf([j].concat(j2 ? [j2] : [], nj), px[0], px[1], W, H, 'Visitor record ' + r.ref); }); }); });
   });
 }
 function buildPdf(jpegs, pxW, pxH, W, H, titleText){
@@ -1663,8 +1934,8 @@ function makeXlsx(list, period){
   var now = new Date(), HEAD = 9, FIRST = HEAD + 1;
   var cols = [
     {h:'Date', w:14}, {h:'Time', w:9}, {h:'Full name', w:26}, {h:'Mobile number', w:18}, {h:'Emirates ID', w:21}, {h:'ID photo', w:16},
-    {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Trade license', w:18}, {h:'Reason for visit', w:23}, {h:'Department', w:18}, {h:'Visiting', w:26},
-    {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'Reference', w:13}
+    {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Trade license', w:18}, {h:'Address', w:30}, {h:'Reason for visit', w:23}, {h:'Department', w:18}, {h:'Visiting', w:26},
+    {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'NDA', w:28}, {h:'Reference', w:13}
   ];
   function cn(i){ return String.fromCharCode(65 + i); }
   var LAST = cn(cols.length - 1), lastRow = HEAD + Math.max(list.length, 1);
@@ -1684,8 +1955,8 @@ function makeXlsx(list, period){
     var d = new Date(r.ts), n = FIRST + ri;
     var cells = [
       [serial(d), 6, 1], [(d.getHours() * 60 + d.getMinutes()) / 1440, 8, 1], [r.name, 7], [r.mobile, 5], [r.eid, 5],
-      [r.eidPhoto ? 'Yes (in visitor PDF)' : 'No', 5], [r.email, 5], [r.company, 5], [r.license, 5], [typeLabel(r.type), 5], [r.dept ? deptLabel(r.dept) : '', 5], [r.host, 5],
-      [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.ref, 5]
+      [r.eidPhoto ? 'Yes (in visitor PDF)' : 'No', 5], [r.email, 5], [r.company, 5], [r.license, 5], [r.address, 5], [typeLabel(r.type), 5], [r.dept ? deptLabel(r.dept) : '', 5], [r.host, 5],
+      [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (in visitor PDF)' : 'Not required', 5], [r.ref, 5]
     ];
     rows.push('<row r="' + n + '" ht="24" customHeight="1">' + cells.map(function(c, ci){ return c[2] ? num(cn(ci) + n, c[0], c[1]) : str(cn(ci) + n, c[0], c[1]); }).join('') + '</row>');
   });
@@ -1703,7 +1974,7 @@ function makeXlsx(list, period){
     '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.6" header="0.3" footer="0.3"/>' +
     '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
     '<headerFooter><oddFooter>&amp;L&amp;8Confidential. Contains personal data.&amp;R&amp;8Page &amp;P of &amp;N</oddFooter></headerFooter>' +
-    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' I' + FIRST + ':I' + lastRow + ' P' + FIRST + ':P' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
+    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' I' + FIRST + ':I' + lastRow + ' R' + FIRST + ':R' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
     '<drawing r:id="rId1"/></worksheet>';
 
   var F = function(extra, size, color){ return '<font>' + extra + '<sz val="' + size + '"/><color rgb="FF' + color + '"/><name val="Dubai"/><family val="2"/></font>'; };
