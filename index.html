@@ -346,6 +346,7 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
       <div class="submit-row">
         <button type="submit" class="btn btn-primary btn-xl" id="submitBtn"><span data-t="signIn"></span> <span class="arrow js-arrow">→</span></button>
       </div>
+      <div class="err" id="errSubmit" role="alert"></div>
     </form>
   </div>
   <div class="band" aria-hidden="true"><canvas id="formBand"></canvas></div>
@@ -485,7 +486,7 @@ var T = {
     switchLang:'العربية', startAgain:'Start again',
     formTitle:'Visitor sign-in.', formLead:'It takes about one minute. When you finish, please take a seat.',
     secReason:'Reason for your visit', secDetails:'Your details', secHost:'Who you are visiting', secPrivacy:'Privacy',
-    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', fDept:'Department you are visiting', deptPick:'Choose a department', eDept:'Please choose the department you are visiting.', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
+    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', eCheck:'Some details are missing. Please check the messages above.', fDept:'Department you are visiting', deptPick:'Choose a department', eDept:'Please choose the department you are visiting.', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
     privacyText:'We keep this record to manage safety and security at our premises. It is stored securely and only authorised staff can see it. We do not share it or use it for marketing. If you add a photo of your Emirates ID, it is kept with this record. To see or correct your record, please ask at reception.',
     consentText:'I agree that Bioscript Center may keep this record for this purpose.',
     signIn:'Sign in',
@@ -504,7 +505,7 @@ var T = {
     switchLang:'English', startAgain:'البدء من جديد',
     formTitle:'تسجيل دخول الزوار.', formLead:'يستغرق ذلك دقيقة تقريبًا. بعد الانتهاء، تفضّل بالجلوس.',
     secReason:'سبب الزيارة', secDetails:'بياناتك', secHost:'الجهة التي تزورها', secPrivacy:'الخصوصية',
-    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', fDept:'القسم الذي تزوره', deptPick:'اختر القسم', eDept:'يُرجى اختيار القسم الذي تزوره.', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
+    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', eCheck:'بعض البيانات ناقصة. يُرجى مراجعة الرسائل أعلاه.', fDept:'القسم الذي تزوره', deptPick:'اختر القسم', eDept:'يُرجى اختيار القسم الذي تزوره.', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
     privacyText:'نحتفظ بهذا السجل لإدارة السلامة والأمن في مقرّنا. يُحفظ السجل بشكل آمن، ولا يطّلع عليه إلا الموظفون المخوّلون. لا نشاركه مع أي جهة ولا نستخدمه لأغراض تسويقية. إذا أضفت صورة لبطاقة الهوية الإماراتية، فستُحفظ مع هذا السجل. للاطلاع على سجلك أو تصحيحه، يُرجى مراجعة الاستقبال.',
     consentText:'أوافق على احتفاظ مركز بايوسكريبت بهذا السجل لهذا الغرض.',
     signIn:'تسجيل الدخول',
@@ -934,6 +935,7 @@ var photoDb = (function(){
         r.onupgradeneeded = function(){ r.result.createObjectStore('photos'); };
         r.onsuccess = function(){ res(r.result); };
         r.onerror = function(){ rej(r.error); };
+        r.onblocked = function(){ rej(new Error('blocked')); };
       } catch(e){ rej(e); }
     });
     p.catch(function(){ p = null; });
@@ -953,6 +955,7 @@ var photoDb = (function(){
     clear: function(){ return tx('readwrite', function(s){ return s.clear(); }); }
   };
 })();
+function withTimeout(p, ms){ return new Promise(function(res, rej){ var t = setTimeout(function(){ rej(new Error('timeout')); }, ms); p.then(function(v){ clearTimeout(t); res(v); }, function(e){ clearTimeout(t); rej(e); }); }); }
 function pickPhoto(){ var f = $('#eidFile'); f.value = ''; f.click(); }
 $('#eidCamBtn').addEventListener('click', pickPhoto);
 $('#eidRetake').addEventListener('click', pickPhoto);
@@ -999,6 +1002,7 @@ function setErr(el, msg, key){
 function startForm(l){
   lang = l || 'en';
   resetState();
+  busy = false; $('#submitBtn').disabled = false;
   $('#visitForm').reset(); setEidPhoto(null); updateTypeFields(); $('#fDept').value = ''; $('#fDept').classList.add('is-empty');
   ['#fName','#fMobile','#fEid','#fEmail','#fLicense','#fDept'].forEach(function(s){ $(s).removeAttribute('aria-invalid'); });
   $$('#form .err').forEach(function(e){ setErr(e, null); });
@@ -1079,6 +1083,7 @@ $('#visitForm').addEventListener('submit', function(e){
   e.preventDefault();
   if (busy) return;
   var L = T[lang], first = null;
+  setErr($('#errSubmit'), null);
   var name = $('#fName').value.replace(/\s+/g,' ').trim(), mobile = mobileClean($('#fMobile').value).trim(),
       eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim(), license = licNeeded() ? licClean($('#fLicense').value) : '', dept = $('#fDept').value;
   function bad(inputSel, errSel, key){
@@ -1097,9 +1102,10 @@ $('#visitForm').addEventListener('submit', function(e){
   if (state.host == null) bad(null, '#errHost', 'eHost');
   if (!$('#fConsent').checked) bad(null, '#errConsent', 'eConsent');
   if (first){
+    setErr($('#errSubmit'), L.eCheck, 'eCheck');
     var box = first.closest('.sec, .fld') || first;
     box.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
-    if (first.tagName === 'INPUT') setTimeout(function(){ first.focus(); }, 350);
+    if (first.tagName === 'INPUT' || first.tagName === 'SELECT') setTimeout(function(){ first.focus(); }, 350);
     return;
   }
   var now = new Date(), host = settings.hosts[state.host] || {en:''};
@@ -1110,7 +1116,7 @@ $('#visitForm').addEventListener('submit', function(e){
     host: host.en, hostAr: host.ar || '', lang: lang, consent: true, device: settings.ipadName
   };
   busy = true; $('#submitBtn').disabled = true;
-  (eidPhoto ? photoDb.put(rec.id, eidPhoto.bytes) : Promise.resolve()).then(function(){
+  (eidPhoto ? withTimeout(photoDb.put(rec.id, eidPhoto.bytes), 8000) : Promise.resolve()).then(function(){
   records.push(rec);
   if (!store.set('bsv.records', records)){
     records.pop(); if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){});
@@ -1124,7 +1130,8 @@ $('#visitForm').addEventListener('submit', function(e){
     rec.eidPhoto = false; setEidPhoto(null);
     setErr($('#errEid'), L.ePhotoSave, 'ePhotoSave'); $('#fEid').setAttribute('aria-invalid', 'true');
     $('#fldEid').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
-  }).then(function(){ busy = false; $('#submitBtn').disabled = false; });
+  }).catch(function(err){ try { console.error(err); } catch(x){} setErr($('#errSubmit'), L.eSave || L.eCheck, 'eSave'); })
+  .then(function(){ busy = false; $('#submitBtn').disabled = false; });
 });
 
 /* ---------------- thank you ---------------- */
