@@ -285,7 +285,7 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
           </div>
           <div class="fld">
             <label for="fMobile" data-t="fMobile"></label>
-            <input class="inp ltr" id="fMobile" type="tel" inputmode="tel" autocomplete="off" placeholder="+971 50 123 4567" enterkeyhint="next">
+            <input class="inp ltr" id="fMobile" type="tel" inputmode="tel" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="20" dir="ltr" placeholder="+971 50 123 4567" enterkeyhint="next">
             <div class="err" id="errMobile"></div>
           </div>
           <div class="fld" id="fldEid">
@@ -891,7 +891,7 @@ var EID_REQ = {meeting:1, contractor:1, interview:1, supplier:1, other:1};   // 
 var LIC_REQ = {contractor:1, supplier:1, other:1};                          // trade license number needed
 function eidNeeded(){ return !!(state && state.type && EID_REQ[state.type]); }
 function licNeeded(){ return !!(state && state.type && LIC_REQ[state.type]); }
-function licClean(v){ return String(v || '').replace(/\s+/g, ' ').trim().toUpperCase(); }
+function licClean(v){ return toLatinDigits(v).replace(/\s+/g, ' ').trim().toUpperCase(); }
 function licOk(v){ return v.length >= 2 && /^[A-Z0-9][A-Z0-9 .\/\-]*$/.test(v); }
 function updateTypeFields(){
   var eReq = eidNeeded(), lReq = licNeeded();
@@ -1009,8 +1009,18 @@ function startForm(l){
   requestAnimationFrame(function(){ if (formBand.layout()){ formBand.reset(); updateProgress(); } });
   armIdle();
 }
-function mobileOk(v){ var d = v.replace(/\D/g, ''); return /^[+\d\s\-()]+$/.test(v.trim()) && d.length >= 7 && d.length <= 15; }
-function eidDigits(v){ return String(v || '').replace(/\D/g, ''); }
+function mobileOk(v){ v = mobileClean(v); var d = v.replace(/\D/g, ''); return /^[+\d\s\-()]+$/.test(v.trim()) && d.length >= 7 && d.length <= 15; }
+function toLatinDigits(v){   // Arabic keyboards type ٠١٢٣٤٥٦٧٨٩ (or ۰۱۲…): turn them into 0-9
+  return String(v == null ? '' : v).replace(/[٠-٩]/g, function(c){ return String(c.charCodeAt(0) - 0x0660); })
+    .replace(/[۰-۹]/g, function(c){ return String(c.charCodeAt(0) - 0x06F0); });
+}
+function mobileClean(v){ return toLatinDigits(v).replace(/[^\d+\s\-()]/g, '').replace(/\s{2,}/g, ' ').slice(0, 20); }
+function cleanField(el, fn){   // tidy what was typed without moving the cursor
+  var v = el.value, nv = fn(v); if (nv === v) return;
+  var pos = el.selectionStart == null ? v.length : el.selectionStart, at = Math.min(nv.length, fn(v.slice(0, pos)).length);
+  el.value = nv; try { el.setSelectionRange(at, at); } catch(e){}
+}
+function eidDigits(v){ return toLatinDigits(v).replace(/\D/g, ''); }
 function eidOk(v){ var d = eidDigits(v); return !d || (d.length === 15 && d.slice(0,3) === '784'); }
 function eidFormat(v){ var d = eidDigits(v).slice(0,15), p = [d.slice(0,3), d.slice(3,7), d.slice(7,14), d.slice(14)]; return p.filter(function(x){ return x; }).join('-'); }
 function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
@@ -1049,7 +1059,9 @@ $('#fConsent').addEventListener('change', function(){ setErr($('#errConsent'), n
 $('#fName').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fMobile').focus(); } });
 $('#fMobile').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fEid').focus(); } });
 $('#fEid').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fEmail').focus(); } });
-$('#fEid').addEventListener('input', function(){ var f = eidFormat(this.value); if (f !== this.value) this.value = f; });
+$('#fEid').addEventListener('input', function(e){ if (e.isComposing) return; var f = eidFormat(this.value); if (f !== this.value){ this.value = f; } updateProgress(); });
+$('#fMobile').addEventListener('input', function(e){ if (e.isComposing) return; cleanField(this, mobileClean); updateProgress(); });
+$('#fLicense').addEventListener('input', function(e){ if (e.isComposing) return; cleanField(this, function(v){ return toLatinDigits(v); }); });
 $('#fDept').addEventListener('change', function(){ this.classList.toggle('is-empty', !this.value); this.removeAttribute('aria-invalid'); setErr($('#errDept'), null); updateProgress(); });
 $('#fEmail').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fCompany').focus(); } });
 $('#fCompany').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); if (!$('#fldLicense').hidden) $('#fLicense').focus(); else this.blur(); } });
@@ -1067,7 +1079,7 @@ $('#visitForm').addEventListener('submit', function(e){
   e.preventDefault();
   if (busy) return;
   var L = T[lang], first = null;
-  var name = $('#fName').value.replace(/\s+/g,' ').trim(), mobile = $('#fMobile').value.trim(),
+  var name = $('#fName').value.replace(/\s+/g,' ').trim(), mobile = mobileClean($('#fMobile').value).trim(),
       eid = eidFormat($('#fEid').value), email = $('#fEmail').value.trim(), company = $('#fCompany').value.replace(/\s+/g,' ').trim(), license = licNeeded() ? licClean($('#fLicense').value) : '', dept = $('#fDept').value;
   function bad(inputSel, errSel, key){
     setErr($(errSel), L[key], key);
