@@ -393,6 +393,7 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
       <div class="sig-box">
         <span class="label" data-t="ndaSignHere"></span>
         <p class="sig-note" data-t="ndaAgree"></p>
+        <p class="sig-note" id="ndaMailNote" data-t="ndaMailNote" hidden></p>
         <div class="sig-pad"><canvas id="sigPad" aria-label="Signature"></canvas><span class="sig-hint" id="sigHint" data-t="ndaHint"></span></div>
         <div class="sig-row"><span class="sig-who" id="sigWho"></span><button type="button" class="link-btn" id="sigClear" data-t="ndaClear"></button></div>
         <div class="err" id="errSig" role="alert"></div>
@@ -469,6 +470,17 @@ details.settings summary{font-weight:700;color:var(--ink);font-size:17px;padding
         <p class="help">One per line: English | Arabic. The Arabic part is optional.</p>
         <button class="btn btn-secondary" id="saveHosts" style="margin-top:12px">Save list</button>
       </div>
+      <div class="fld" style="grid-column:1/-1">
+        <label for="setMailUrl">Email the signed NDA to the visitor</label>
+        <input class="inp" id="setMailUrl" type="url" inputmode="url" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Paste the Power Automate link (https://…)">
+        <p class="help">The link comes from the company's Power Automate flow. It stays on this iPad only. Leave it empty to turn emails off.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;align-items:center">
+          <button class="btn btn-secondary" id="saveMailUrl">Save link</button>
+          <input class="inp" id="testMailTo" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your email for a test" style="max-width:340px">
+          <button class="btn btn-secondary" id="testMail">Send a test email</button>
+        </div>
+        <p class="help" id="mailStatus" role="status"></p>
+      </div>
     </div>
   </details>
   <div class="s-foot">
@@ -535,7 +547,7 @@ var T = {
     switchLang:'العربية', startAgain:'Start again',
     formTitle:'Visitor sign-in.', formLead:'It takes about one minute. When you finish, please take a seat.',
     secReason:'Reason for your visit', secDetails:'Your details', secHost:'Who you are visiting', secPrivacy:'Privacy',
-    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', fAddress:'Address', ndaTitle:'Please sign the NDA.', ndaLead:'Please read the agreement below, then sign at the bottom with your finger.', ndaBack:'Back', ndaSignHere:'Your signature', ndaAgree:'By signing, you agree to this non-disclosure agreement.', ndaHint:'Sign here with your finger', ndaClear:'Clear', ndaSign:'Sign and finish', eSig:'Please sign in the box above.', eSigSave:'Sorry, the signature could not be saved. Please try again.', eCheck:'Some details are missing. Please check the messages above.', fDept:'Department you are visiting', deptPick:'Choose a department', eDept:'Please choose the department you are visiting.', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
+    fName:'Full name', fMobile:'Mobile number', fEid:'Emirates ID', fEmail:'Email', fCompany:'Company or organisation', optional:'(optional)', ndaMailNote:'A copy of the signed agreement (and your Emirates ID photo, if you added one) will be sent to your email.', fAddress:'Address', ndaTitle:'Please sign the NDA.', ndaLead:'Please read the agreement below, then sign at the bottom with your finger.', ndaBack:'Back', ndaSignHere:'Your signature', ndaAgree:'By signing, you agree to this non-disclosure agreement.', ndaHint:'Sign here with your finger', ndaClear:'Clear', ndaSign:'Sign and finish', eSig:'Please sign in the box above.', eSigSave:'Sorry, the signature could not be saved. Please try again.', eCheck:'Some details are missing. Please check the messages above.', fDept:'Department you are visiting', deptPick:'Choose a department', eDept:'Please choose the department you are visiting.', fLicense:'Trade license number', eidHelp:'Type the number, or take a photo of the card.', eidPhotoBtn:'Take a photo of the ID', eidPhotoDone:'ID photo added', eidRetake:'Retake', eidRemove:'Remove', eEidNeed:'Please type your Emirates ID number or take a photo of the card.', eLicense:'Please enter the trade license number.', ePhoto:'Sorry, the photo could not be used. Please try again or type the number.', ePhotoSave:'Sorry, the photo could not be saved. Please type the Emirates ID number instead.', 
     privacyText:'We keep this record to manage safety and security at our premises. It is stored securely and only authorised staff can see it. We do not share it or use it for marketing. If you add a photo of your Emirates ID, it is kept with this record. To see or correct your record, please ask at reception.',
     consentText:'I agree that Bioscript Center may keep this record for this purpose.',
     signIn:'Sign in',
@@ -554,7 +566,7 @@ var T = {
     switchLang:'English', startAgain:'البدء من جديد',
     formTitle:'تسجيل دخول الزوار.', formLead:'يستغرق ذلك دقيقة تقريبًا. بعد الانتهاء، تفضّل بالجلوس.',
     secReason:'سبب الزيارة', secDetails:'بياناتك', secHost:'الجهة التي تزورها', secPrivacy:'الخصوصية',
-    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', fAddress:'العنوان', ndaTitle:'يُرجى توقيع اتفاقية عدم الإفصاح.', ndaLead:'يُرجى قراءة الاتفاقية أدناه، ثم التوقيع في الأسفل بإصبعك.', ndaBack:'رجوع', ndaSignHere:'توقيعك', ndaAgree:'بتوقيعك، فإنك توافق على اتفاقية عدم الإفصاح هذه.', ndaHint:'وقّع هنا بإصبعك', ndaClear:'مسح', ndaSign:'توقيع وإنهاء', eSig:'يُرجى التوقيع في المربع أعلاه.', eSigSave:'عذرًا، تعذّر حفظ التوقيع. يُرجى المحاولة مرة أخرى.', eCheck:'بعض البيانات ناقصة. يُرجى مراجعة الرسائل أعلاه.', fDept:'القسم الذي تزوره', deptPick:'اختر القسم', eDept:'يُرجى اختيار القسم الذي تزوره.', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
+    fName:'الاسم الكامل', fMobile:'رقم الهاتف المتحرك', fEid:'رقم الهوية الإماراتية', fEmail:'البريد الإلكتروني', fCompany:'الشركة أو الجهة', optional:'(اختياري)', ndaMailNote:'ستُرسل إلى بريدك الإلكتروني نسخة من الاتفاقية الموقّعة (وصورة الهوية الإماراتية إن أضفتها).', fAddress:'العنوان', ndaTitle:'يُرجى توقيع اتفاقية عدم الإفصاح.', ndaLead:'يُرجى قراءة الاتفاقية أدناه، ثم التوقيع في الأسفل بإصبعك.', ndaBack:'رجوع', ndaSignHere:'توقيعك', ndaAgree:'بتوقيعك، فإنك توافق على اتفاقية عدم الإفصاح هذه.', ndaHint:'وقّع هنا بإصبعك', ndaClear:'مسح', ndaSign:'توقيع وإنهاء', eSig:'يُرجى التوقيع في المربع أعلاه.', eSigSave:'عذرًا، تعذّر حفظ التوقيع. يُرجى المحاولة مرة أخرى.', eCheck:'بعض البيانات ناقصة. يُرجى مراجعة الرسائل أعلاه.', fDept:'القسم الذي تزوره', deptPick:'اختر القسم', eDept:'يُرجى اختيار القسم الذي تزوره.', fLicense:'رقم الرخصة التجارية', eidHelp:'اكتب الرقم، أو التقط صورة للبطاقة.', eidPhotoBtn:'التقاط صورة للهوية', eidPhotoDone:'تمت إضافة صورة الهوية', eidRetake:'إعادة التصوير', eidRemove:'حذف الصورة', eEidNeed:'يُرجى كتابة رقم الهوية الإماراتية أو التقاط صورة للبطاقة.', eLicense:'يُرجى إدخال رقم الرخصة التجارية.', ePhoto:'عذرًا، تعذّر استخدام الصورة. يُرجى المحاولة مرة أخرى أو كتابة الرقم.', ePhotoSave:'عذرًا، تعذّر حفظ الصورة. يُرجى كتابة رقم الهوية الإماراتية بدلًا منها.', 
     privacyText:'نحتفظ بهذا السجل لإدارة السلامة والأمن في مقرّنا. يُحفظ السجل بشكل آمن، ولا يطّلع عليه إلا الموظفون المخوّلون. لا نشاركه مع أي جهة ولا نستخدمه لأغراض تسويقية. إذا أضفت صورة لبطاقة الهوية الإماراتية، فستُحفظ مع هذا السجل. للاطلاع على سجلك أو تصحيحه، يُرجى مراجعة الاستقبال.',
     consentText:'أوافق على احتفاظ مركز بايوسكريبت بهذا السجل لهذا الغرض.',
     signIn:'تسجيل الدخول',
@@ -1183,6 +1195,7 @@ $('#visitForm').addEventListener('submit', function(e){
   setEidPhoto(null); sigPad.clear();
   document.activeElement && document.activeElement.blur && document.activeElement.blur();
   showThanks(rec);
+  if (rec.nda && rec.email) queueMail(rec.id);
   }, function(err){
     if (err && err.sig){ if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){}); if (current !== 'nda') show('nda'); setErr($('#errSig'), L.eSigSave, 'eSigSave'); return; }
     if (current === 'nda') show('form');
@@ -1328,6 +1341,7 @@ function openNda(rec){
   var L = T[lang];
   renderNda(rec);
   sigPad.clear(); setErr($('#errSig'), null);
+  $('#ndaMailNote').hidden = !(mailReady() && rec.email);
   $('#sigWho').textContent = bidiIso(rec.name) + '  ·  ' + (lang === 'ar' ? fDateAr(new Date()) : fDate(new Date()));
   var s = $('#nda'); s.setAttribute('lang', lang); s.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
   setDisplay($('#ndaTitle'), L.ndaTitle, lang);
@@ -1445,6 +1459,97 @@ function ndaSignBlock(ctx, y, W, r, sig){
   });
   txt(ctx, 'Signed electronically on ' + (r.device || settings.ipadName) + ' on ' + fDate(d) + ' at ' + fTime(d) + '.  Reference ' + r.ref + '.', 36, y + h + 16, {size: 7.6, color: '#626C7C', max: W - 72});
 }
+
+
+/* =====================================================================
+   Email the signed NDA (+ Emirates ID photo) to the visitor, through the
+   company's Microsoft 365 (a Power Automate flow). The flow link is pasted
+   in "Settings for this iPad" and stays on this iPad only.
+   If the iPad is offline, the email waits and is sent later.
+   ===================================================================== */
+function mailReady(){ return /^https:\/\/\S+$/.test(String(settings.mailUrl || '')); }
+function mailQueue(){ var q = store.get('bsv.mailq', []); return Array.isArray(q) ? q : []; }
+function setMailQueue(q){ store.set('bsv.mailq', q); }
+function bytesToB64(u){ var s = ''; for (var i=0;i<u.length;i+=8192) s += String.fromCharCode.apply(null, u.subarray(i, i + 8192)); return btoa(s); }
+function makeNdaMailPdf(r){
+  var W = 595, H = 842, cv = document.createElement('canvas'), keep = PK; PK = 1.8;   // smaller file for email
+  return Promise.all([loadImg(LOGO_SRC), loadIdPhoto(r), loadSig(r)]).then(function(a){
+    var logo = a[0], photo = a[1], sig = a[2], plan = ndaPlan(cv, r);
+    if (!plan) throw new Error('no NDA');
+    var total = plan.pages.length + (photo ? 1 : 0);
+    return ndaPages(cv, W, H, r, logo, sig, plan, 1, total).then(function(nj){
+      return idPage(cv, W, H, r, logo, photo, total, plan.pages.length + 1).then(function(j2){
+        var px = [cv.width, cv.height]; cv.width = cv.height = 0;
+        return buildPdf(nj.concat(j2 ? [j2] : []), px[0], px[1], W, H, 'Signed NDA ' + r.ref);
+      });
+    });
+  }).then(function(out){ PK = keep; return out; }, function(e){ PK = keep; throw e; });
+}
+function postMail(fields){
+  // A simple form post: no special permissions needed from the flow, so it works from the iPad.
+  return withTimeout(fetch(settings.mailUrl, {method: 'POST', mode: 'no-cors', body: new URLSearchParams(fields)}), 60000);
+}
+function sendNdaMail(r){
+  return makeNdaMailPdf(r).then(function(bytes){
+    var d = new Date(r.nda.at);
+    return postMail({to: r.email, name: r.name, ref: r.ref, signed: fDate(d) + ', ' + fTime(d), lang: r.lang || 'en',
+      file: 'Bioscript-NDA_' + r.ref + '.pdf', pdf: bytesToB64(bytes)});
+  });
+}
+function queueMail(id){
+  if (!mailReady()) return;
+  var q = mailQueue(); if (q.indexOf(id) < 0) q.push(id); setMailQueue(q);
+  var r = records.filter(function(x){ return x.id === id; })[0];
+  if (r){ r.mail = {waiting: true, tries: (r.mail && r.mail.tries) || 0}; store.set('bsv.records', records); }
+  runMailQueue();
+}
+var mailBusy = false;
+function runMailQueue(){
+  if (mailBusy || !mailReady() || navigator.onLine === false) return;
+  var q = mailQueue(); if (!q.length) return;
+  var id = q[0], r = records.filter(function(x){ return x.id === id; })[0];
+  if (!r || !r.nda || !r.email){ setMailQueue(q.slice(1)); setTimeout(runMailQueue, 0); return; }
+  mailBusy = true;
+  sendNdaMail(r).then(function(){
+    r.mail = {sent: new Date().toISOString()}; store.set('bsv.records', records);
+    setMailQueue(mailQueue().filter(function(x){ return x !== id; }));
+    mailBusy = false; if (current === 'staff') renderStaff();
+    setTimeout(runMailQueue, 800);
+  }, function(){
+    r.mail = {waiting: true, tries: ((r.mail && r.mail.tries) || 0) + 1, last: new Date().toISOString()}; store.set('bsv.records', records);
+    mailBusy = false; if (current === 'staff') renderStaff();
+  });
+}
+function mailState(r){
+  if (!r.nda || !r.email) return '';
+  if (r.mail && r.mail.sent) return 'NDA emailed ' + fDate(new Date(r.mail.sent)) + ', ' + fTime(new Date(r.mail.sent));
+  if (r.mail && r.mail.waiting) return 'NDA email waiting to send';
+  return '';
+}
+window.addEventListener('online', runMailQueue);
+setInterval(runMailQueue, 5 * 60 * 1000);
+setTimeout(runMailQueue, 5000);
+
+function mailStatusText(){
+  var n = mailQueue().length;
+  return mailReady() ? ('Emails are on.' + (n ? ' ' + n + (n === 1 ? ' email is' : ' emails are') + ' waiting to send.' : '')) : 'Emails are off. Paste the link to turn them on.';
+}
+$('#saveMailUrl').addEventListener('click', function(){
+  var v = $('#setMailUrl').value.trim();
+  if (v && !/^https:\/\/\S+$/.test(v)){ $('#mailStatus').textContent = 'This does not look like a link. It should start with https://'; return; }
+  settings.mailUrl = v; saveSettings(); $('#mailStatus').textContent = 'Saved. ' + mailStatusText(); runMailQueue();
+});
+$('#testMail').addEventListener('click', function(){
+  var to = $('#testMailTo').value.trim(), btn = this;
+  if (!mailReady()){ $('#mailStatus').textContent = 'Please paste and save the link first.'; return; }
+  if (!emailOk(to)){ $('#mailStatus').textContent = 'Please type the email address that should get the test.'; return; }
+  var now = new Date(), r = {id: 'test', ref: 'TEST-' + pad(now.getHours()) + pad(now.getMinutes()), ts: now.toISOString(), name: 'Test visitor', email: to,
+    eid: '784-0000-0000000-0', license: '', address: 'Test address', lang: 'en', device: settings.ipadName, nda: {signed: true, at: now.toISOString()}};
+  btn.disabled = true; $('#mailStatus').textContent = 'Sending a test email…';
+  sendNdaMail(r).then(function(){ $('#mailStatus').textContent = 'Test sent to ' + to + '. Please check that inbox (and the junk folder) in a minute.'; },
+    function(){ $('#mailStatus').textContent = 'Could not reach the link. Check the internet connection and the link, then try again.'; })
+    .then(function(){ btn.disabled = false; });
+});
 
 /* ---------------- idle / privacy reset ---------------- */
 var idleTimer = null, idleCount = null, idleLeft = 0;
@@ -1576,6 +1681,7 @@ function periodLabel(list){
   return (period === '7d' ? 'Last 7 days, ' : 'Last 30 days, ') + fDate(from) + ' to ' + fDate(now);
 }
 function openStaff(){ period = 'today'; query = ''; $('#sSearch').value = ''; $('#setName').value = settings.ipadName;
+  $('#setMailUrl').value = settings.mailUrl || ''; $('#mailStatus').textContent = mailStatusText(); runMailQueue();
   $('#setHosts').value = settings.hosts.map(function(h){ return h.en + (h.ar ? ' | ' + h.ar : ''); }).join('\n');
   $('#settings').open = false; renderStaff(); show('staff'); armStaff(); }
 function renderStaff(){
@@ -1589,10 +1695,10 @@ function renderStaff(){
     list.map(function(r){
       var d = new Date(r.ts);
       return '<tr><td class="nw"><div>' + fDate(d) + '</div><div class="s">' + fTime(d) + '</div></td>' +
-        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + (r.nda ? '<div class="s">NDA signed</div>' : '') + '</td>' +
+        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + (r.nda ? '<div class="s">NDA signed</div>' : '') + (mailState(r) ? '<div class="s">' + esc(mailState(r)) + '</div>' : '') + '</td>' +
         '<td class="nw" dir="ltr">' + esc(r.mobile) + '</td><td class="hide-sm">' + esc(r.company || '–') + (r.license ? '<div class="s">Trade license ' + esc(r.license) + '</div>' : '') + '</td>' +
         '<td>' + esc(typeLabel(r.type)) + '</td><td>' + esc(r.dept ? deptLabel(r.dept) : '–') + '</td><td class="hide-sm">' + esc(r.host) + '</td>' +
-        '<td><button class="btn btn-secondary pdf" data-id="' + esc(r.id) + '">PDF</button></td></tr>';
+        '<td class="nw"><button class="btn btn-secondary pdf" data-id="' + esc(r.id) + '">PDF</button>' + (mailReady() && r.nda && r.email ? ' <button class="btn btn-secondary pdf mail" data-id="' + esc(r.id) + '" title="Email the signed NDA again">Email</button>' : '') + '</td></tr>';
     }).join('') + '</tbody></table>';
 }
 $$('.seg button').forEach(function(b){ b.addEventListener('click', function(){ period = b.getAttribute('data-period'); renderStaff(); }); });
@@ -1609,10 +1715,11 @@ $('#deleteAll').addEventListener('click', function(){
   $('#confirmModal').classList.add('show');
 });
 $('#confirmNo').addEventListener('click', function(){ $('#confirmModal').classList.remove('show'); });
-$('#confirmYes').addEventListener('click', function(){ records = []; store.set('bsv.records', records); photoDb.clear().catch(function(){}); $('#confirmModal').classList.remove('show'); renderStaff(); });
+$('#confirmYes').addEventListener('click', function(){ records = []; store.set('bsv.records', records); photoDb.clear().catch(function(){}); setMailQueue([]); $('#confirmModal').classList.remove('show'); renderStaff(); });
 $('#sList').addEventListener('click', function(e){
   var b = e.target.closest('.pdf'); if (!b) return;
   var r = records.filter(function(x){ return x.id === b.getAttribute('data-id'); })[0]; if (!r) return;
+  if (b.classList.contains('mail')){ queueMail(r.id); alertBox('Sending the signed NDA to ' + r.email + '…'); renderStaff(); return; }
   b.disabled = true; b.textContent = '…';
   savePdf(function(){ return makeRecordPdf(r); }, 'Bioscript-visitor_' + r.ref + '.pdf', 'en')
     .then(function(res){ if (res === 'saved') alertBox('Saved: Bioscript-visitor_' + r.ref + '.pdf'); })
@@ -1793,7 +1900,7 @@ function loadIdPhoto(r){
     return loadImg(url).then(function(img){ return img; }, function(){ return null; }).then(function(img){ setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){} }, 2000); return img; });
   }).catch(function(){ return null; });
 }
-function idPage(cv, W, H, r, logo, photo, total){
+function idPage(cv, W, H, r, logo, photo, total, pageNo){
   if (!photo) return Promise.resolve(null);
   var ctx = page(cv, W, H);
   header(ctx, logo, W);
@@ -1803,7 +1910,7 @@ function idPage(cv, W, H, r, logo, photo, total){
   var w = photo.naturalWidth * k, h = photo.naturalHeight * k;
   ctx.drawImage(photo, 36, 172, w, h);
   ctx.strokeStyle = '#B9DAF1'; ctx.lineWidth = .8; ctx.strokeRect(36, 172, w, h);
-  footer(ctx, W, H, 2, total || 2);
+  footer(ctx, W, H, pageNo || 2, total || 2);
   return toJpeg(cv);
 }
 function makeRecordPdf(r){
@@ -1935,7 +2042,7 @@ function makeXlsx(list, period){
   var cols = [
     {h:'Date', w:14}, {h:'Time', w:9}, {h:'Full name', w:26}, {h:'Mobile number', w:18}, {h:'Emirates ID', w:21}, {h:'ID photo', w:16},
     {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Trade license', w:18}, {h:'Address', w:30}, {h:'Reason for visit', w:23}, {h:'Department', w:18}, {h:'Visiting', w:26},
-    {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'NDA', w:28}, {h:'Reference', w:13}
+    {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'NDA', w:28}, {h:'NDA email', w:24}, {h:'Reference', w:13}
   ];
   function cn(i){ return String.fromCharCode(65 + i); }
   var LAST = cn(cols.length - 1), lastRow = HEAD + Math.max(list.length, 1);
@@ -1956,7 +2063,7 @@ function makeXlsx(list, period){
     var cells = [
       [serial(d), 6, 1], [(d.getHours() * 60 + d.getMinutes()) / 1440, 8, 1], [r.name, 7], [r.mobile, 5], [r.eid, 5],
       [r.eidPhoto ? 'Yes (in visitor PDF)' : 'No', 5], [r.email, 5], [r.company, 5], [r.license, 5], [r.address, 5], [typeLabel(r.type), 5], [r.dept ? deptLabel(r.dept) : '', 5], [r.host, 5],
-      [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (in visitor PDF)' : 'Not required', 5], [r.ref, 5]
+      [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (in visitor PDF)' : 'Not required', 5], [r.mail && r.mail.sent ? 'Sent ' + fDate(new Date(r.mail.sent)) + ', ' + fTime(new Date(r.mail.sent)) : (r.mail && r.mail.waiting ? 'Waiting to send' : ''), 5], [r.ref, 5]
     ];
     rows.push('<row r="' + n + '" ht="24" customHeight="1">' + cells.map(function(c, ci){ return c[2] ? num(cn(ci) + n, c[0], c[1]) : str(cn(ci) + n, c[0], c[1]); }).join('') + '</row>');
   });
@@ -1974,7 +2081,7 @@ function makeXlsx(list, period){
     '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.6" header="0.3" footer="0.3"/>' +
     '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
     '<headerFooter><oddFooter>&amp;L&amp;8Confidential. Contains personal data.&amp;R&amp;8Page &amp;P of &amp;N</oddFooter></headerFooter>' +
-    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' I' + FIRST + ':I' + lastRow + ' R' + FIRST + ':R' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
+    (list.length ? '<ignoredErrors><ignoredError sqref="D' + FIRST + ':E' + lastRow + ' I' + FIRST + ':I' + lastRow + ' S' + FIRST + ':S' + lastRow + '" numberStoredAsText="1"/></ignoredErrors>' : '') +
     '<drawing r:id="rId1"/></worksheet>';
 
   var F = function(extra, size, color){ return '<font>' + extra + '<sz val="' + size + '"/><color rgb="FF' + color + '"/><name val="Dubai"/><family val="2"/></font>'; };
