@@ -655,7 +655,7 @@ function typeLabel(k, lang){ for (var i=0;i<TYPES.length;i++) if (TYPES[i].k ===
 var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---------------- orange dot (brand Tier 2 on display type) ---------------- */
+/* ---------------- orange full stop (the only orange in text) ---------------- */
 var CAN_DOT = typeof TextMetrics !== 'undefined' && 'actualBoundingBoxAscent' in TextMetrics.prototype;
 function dotify(str, withLetters){
   // Orange full stop at the end of the sentence; orange dot on i and j in display type (Latin only).
@@ -691,7 +691,7 @@ function measureDot(el){
   el.style.setProperty('--iw', iw.toFixed(4) + 'em');
 }
 function setDisplay(el, text, lang){
-  el.innerHTML = dotify(text, lang !== 'ar');
+  el.innerHTML = dotify(text, false);   // brand rule: only the full stop is orange, never the dot on i or j
   measureDot(el);
 }
 
@@ -842,7 +842,7 @@ var field = new Lattice($('#fieldCanvas'), {
   keep: function(u){ var d = Math.abs(u - .5) * 2; return d < .4 ? 1 : Math.max(0, 1 - (d - .4) / .5); },
   alpha: function(u){ var d = Math.abs(u - .5) * 2; return d < .4 ? 1 : Math.max(.12, 1 - (d - .4) / .45); },
   dens: function(u){ var d = Math.abs(u - .5) * 2; return d > .58 ? 0 : (.03 + .72 * Math.exp(-Math.pow((d - .3) / .17, 2))) * (d > .45 ? (.58 - d) / .13 : 1); },
-  fade: false, idle: true, seed: 11, dots: 1, diamond: false
+  fade: false, idle: true, seed: 11, dots: 0, diamond: false
 });
 /* ---------------- welcome: turning globe with the two logos ----------------
    A globe of brand-blue dots turns slowly (Dubai marked); the Qaly and Bioscript
