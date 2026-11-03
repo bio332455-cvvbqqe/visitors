@@ -1494,8 +1494,17 @@ function makeNdaMailPdf(r){
   }).then(function(out){ PK = keep; return out; }, function(e){ PK = keep; throw e; });
 }
 function postMail(fields){
-  // A simple form post: no special permissions needed from the flow, so it works from the iPad.
-  return withTimeout(fetch(settings.mailUrl, {method: 'POST', mode: 'no-cors', body: new URLSearchParams(fields)}), 60000);
+  // Sent to the flow's "When a Teams webhook request is received" link (a free, standard trigger).
+  // The trigger wants a Teams card, so a tiny card goes first; our data rides along in "bsv".
+  var body = JSON.stringify({
+    type: 'message',
+    attachments: [{contentType: 'application/vnd.microsoft.card.adaptive', contentUrl: null,
+      content: {'$schema': 'http://adaptivecards.io/schemas/adaptive-card.json', type: 'AdaptiveCard', version: '1.2',
+        body: [{type: 'TextBlock', text: 'Signed NDA ' + fields.ref}]}}],
+    bsv: fields
+  });
+  return withTimeout(fetch(settings.mailUrl, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: body}), 60000)
+    .then(function(res){ if (!res.ok) throw new Error('The flow answered ' + res.status); return res; });
 }
 function sendNdaMail(r){
   return makeNdaMailPdf(r).then(function(bytes){
@@ -1555,7 +1564,9 @@ $('#testMail').addEventListener('click', function(){
     eid: '784-0000-0000000-0', license: '', address: 'Test address', lang: 'en', device: settings.ipadName, nda: {signed: true, at: now.toISOString()}};
   btn.disabled = true; $('#mailStatus').textContent = 'Sending a test email…';
   sendNdaMail(r).then(function(){ $('#mailStatus').textContent = 'Test sent to ' + to + '. Please check that inbox (and the junk folder) in a minute.'; },
-    function(){ $('#mailStatus').textContent = 'Could not reach the link. Check the internet connection and the link, then try again.'; })
+    function(e){ $('#mailStatus').textContent = (e && /^The flow answered/.test(e.message))
+      ? e.message + '. Check that the flow is turned on and the link is complete, then try again.'
+      : 'Could not reach the link. Check the internet connection and the link, then try again.'; })
     .then(function(){ btn.disabled = false; });
 });
 
