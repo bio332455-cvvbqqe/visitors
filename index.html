@@ -280,6 +280,7 @@ Bioscript Center.</h1>
   </div>
   <footer class="w-foot">
     <span class="label">Bioscript Center by Qaly Health Shield</span>
+    <span class="label" id="mailOffNote" lang="en" dir="ltr" hidden>Email copies are off on this iPad. Staff: open Settings.</span>
     <button class="icon-btn" id="staffBtn" aria-label="Staff access">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="2.1" fill="#F26B1D" stroke="none"/></svg>
     </button>
@@ -496,7 +497,7 @@ Bioscript Center.</h1>
           <button class="btn btn-secondary" id="setupQrBtn">Set up another iPad</button>
         </div>
         <p class="help">Shows a code to scan with the other iPad's Camera. It turns emails on there in one step.</p>
-        <p class="help">Page version: 3 Nov 2026 (email 3). If an iPad shows an older date, close the page and open the link again.</p>
+        <p class="help">Page version: 3 Nov 2026 (email 4). If an iPad shows an older date, close the page and open the link again.</p>
       </div>
     </div>
   </details>
@@ -548,10 +549,14 @@ Bioscript Center.</h1>
   <div class="dialog">
     <h3 id="setupTitle">Emails are on for this iPad<span class="stop">.</span></h3>
     <div id="setupText"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px">
+      <input class="inp" id="setupTestTo" type="email" inputmode="email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Your email for a test" style="flex:1;min-width:200px">
+      <button class="btn btn-secondary" id="setupTest">Send a test email</button>
+    </div>
+    <p class="help" id="setupStatus" role="status" style="margin:0 0 16px"></p>
     <div class="row">
       <button class="btn btn-primary" id="setupDone">Finish</button>
     </div>
-    <p class="help" id="setupStatus" role="status" style="margin:14px 0 0"></p>
   </div>
 </div>
 
@@ -2839,17 +2844,24 @@ function runMailQueue(){
     setThanksMail(r, 'mailSent');
     mailBusy = false; if (current === 'staff') renderStaff();
     setTimeout(runMailQueue, 800);
-  }, function(){
-    r.mail = {waiting: true, tries: ((r.mail && r.mail.tries) || 0) + 1, last: new Date().toISOString()}; store.set('bsv.records', records);
+  }, function(e){
+    r.mail = {waiting: true, tries: ((r.mail && r.mail.tries) || 0) + 1, last: new Date().toISOString(), err: mailErrText(e)}; store.set('bsv.records', records);
     mailBusy = false; if (current === 'staff') renderStaff();
     setThanksMail(r, 'mailLater');
     if (((r.mail && r.mail.tries) || 0) < 4) setTimeout(runMailQueue, 20000);   // try again soon, not only every 5 minutes
   });
 }
+function mailErrText(e){
+  var m = String((e && e.message) || e || '');
+  if (/^The flow answered/.test(m)) return m;
+  if (/timed? ?out/i.test(m)) return 'no answer from Microsoft in 60 seconds';
+  if (/no NDA/.test(m)) return 'the signed agreement could not be found';
+  return 'could not reach Microsoft (check the Wi-Fi or internet)';
+}
 function mailState(r){
   if (!r.nda || !r.email) return '';
   if (r.mail && r.mail.sent) return 'NDA emailed ' + fDate(new Date(r.mail.sent)) + ', ' + fTime(new Date(r.mail.sent));
-  if (r.mail && r.mail.waiting) return 'NDA email waiting to send';
+  if (r.mail && r.mail.waiting) return 'NDA email waiting to send' + (r.mail.err ? ' (' + r.mail.err + ')' : '');
   return '';
 }
 window.addEventListener('online', runMailQueue);
@@ -2864,6 +2876,7 @@ $('#saveMailUrl').addEventListener('click', function(){
   var v = $('#setMailUrl').value.trim();
   if (v && !/^https:\/\/\S+$/.test(v)){ $('#mailStatus').textContent = 'This does not look like a link. It should start with https://'; return; }
   settings.mailUrl = v; saveSettings(); $('#mailStatus').textContent = 'Saved. ' + mailStatusText(); runMailQueue();
+  var n = $('#mailOffNote'); if (n) n.hidden = mailReady();
 });
 $('#testMail').addEventListener('click', function(){
   var to = $('#testMailTo').value.trim(), btn = this;
@@ -2875,7 +2888,7 @@ $('#testMail').addEventListener('click', function(){
   sendNdaMail(r).then(function(){ $('#mailStatus').textContent = 'Test sent to ' + to + '. Please check that inbox (and the junk folder) in a minute.'; },
     function(e){ $('#mailStatus').textContent = (e && /^The flow answered/.test(e.message))
       ? e.message + '. Check that the flow is turned on and the link is complete, then try again.'
-      : 'Could not reach the link. Check the internet connection and the link, then try again.'; })
+      : 'Could not send: ' + mailErrText(e) + '. Check the link, then try again.'; })
     .then(function(){ btn.disabled = false; });
 });
 
@@ -3488,10 +3501,10 @@ resetState();
 show('welcome');
 
 /* ---------------- one-step email setup for another iPad ---------------- */
-var PAGE_VER = '3nov-e3';
+var PAGE_VER = '3nov-e4';
 var FLOW_RE = /^https:\/\/[^\/?#\s]+\.powerplatform\.com(:443)?\/\S*[?&]sig=\S+$/;
 function isStandalone(){ try { return navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches); } catch(e){ return false; } }
-function setupLink(){ return location.origin + location.pathname + '?v=' + PAGE_VER + '#mail=' + settings.mailUrl; }
+function setupLink(){ return location.origin + location.pathname + '?v=' + PAGE_VER + '&setup=' + encodeURIComponent(settings.mailUrl); }
 function drawQr(canvas, text){
   var qr = new BSV_QR.QRCode(-1, BSV_QR.L.M); qr.addData(text); qr.make();
   var n = qr.getModuleCount(), quiet = 4, size = n + quiet * 2, scale = Math.max(3, Math.floor(640 / size)), ctx = canvas.getContext('2d');
@@ -3506,22 +3519,35 @@ $('#setupQrBtn').addEventListener('click', function(){
   $('#qrModal').classList.add('show');
 });
 $('#qrClose').addEventListener('click', function(){ $('#qrModal').classList.remove('show'); var c = $('#qrCanvas'); c.getContext('2d').clearRect(0, 0, c.width, c.height); });
-function clearSetupHash(){ try { history.replaceState(null, '', location.pathname + location.search); } catch(e){} }
+function clearSetupHash(){ try { history.replaceState(null, '', location.pathname + '?v=' + PAGE_VER); } catch(e){} }
+function mailOffNote(){ var n = $('#mailOffNote'); if (n) n.hidden = mailReady(); }
 (function setupFromLink(){
-  var h = String(location.hash || ''), i = h.indexOf('#mail=');
-  if (i !== 0) return;
-  var u = h.slice(6); try { if (/^https%3A/i.test(u)) u = decodeURIComponent(u); } catch(e){}
-  if (!FLOW_RE.test(u)){ clearSetupHash(); return; }
-  settings.mailUrl = u; saveSettings();
-  var app = isStandalone();
-  if (app) clearSetupHash();
+  var u = '';
+  try { u = new URLSearchParams(location.search).get('setup') || ''; } catch(e){}
+  var h = String(location.hash || '');
+  if (!u && h.indexOf('#mail=') === 0){ u = h.slice(6); try { if (/^https%3A/i.test(u)) u = decodeURIComponent(u); } catch(e){} }
+  if (!u){ mailOffNote(); return; }
+  if (!FLOW_RE.test(u)){ clearSetupHash(); mailOffNote(); return; }
+  var app = isStandalone(), changed = settings.mailUrl !== u;
+  settings.mailUrl = u; saveSettings(); mailOffNote();
+  if (app){ clearSetupHash(); if (!changed) return; }   // the Home Screen icon keeps the link in its own address
   $('#setupText').innerHTML = app
-    ? '<p>This iPad will now email the signed NDA to every visitor who signs it. Use this icon for visitors from now on.</p>'
-    : '<p>The link is saved in Safari on this iPad. To use the sign-in page from the Home Screen:</p><ol><li>Tap the <strong>Share</strong> button (the square with an arrow).</li><li>Tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li><li>Open the new <strong>Visitors</strong> icon. It will show this message again.</li></ol><p>If you only use Safari, just tap <strong>Finish</strong>.</p>';
+    ? '<p>This Home Screen icon will now email the signed NDA to every visitor who signs it. Use this icon for visitors.</p><p>Send yourself a test to check it now.</p>'
+    : '<p>Emails are on in Safari on this iPad. Send yourself a test to check it now.</p><p><strong>If visitors use a Home Screen icon:</strong> delete the old icon first (export its records to Excel before). Then, while this message is open, tap <strong>Share</strong> \u203a <strong>Add to Home Screen</strong> \u203a <strong>Add</strong>, and open the new <strong>Visitors</strong> icon. It turns emails on there too.</p>';
   $('#setupStatus').textContent = '';
   $('#setupModal').classList.add('show');
 })();
-$('#setupDone').addEventListener('click', function(){ clearSetupHash(); $('#setupModal').classList.remove('show'); runMailQueue(); });
+$('#setupTest').addEventListener('click', function(){
+  var to = $('#setupTestTo').value.trim(), btn = this;
+  if (!emailOk(to)){ $('#setupStatus').textContent = 'Please type the email address that should get the test.'; return; }
+  var now = new Date(), r = {id: 'test', ref: 'TEST-' + pad(now.getHours()) + pad(now.getMinutes()), ts: now.toISOString(), name: 'Test visitor', email: to,
+    eid: '784-0000-0000000-0', license: '', address: 'Test address', lang: 'en', device: settings.ipadName, nda: {signed: true, at: now.toISOString()}};
+  btn.disabled = true; $('#setupStatus').textContent = 'Sending a test email\u2026';
+  sendNdaMail(r).then(function(){ $('#setupStatus').textContent = 'Test sent to ' + to + '. It should arrive within a minute (check the junk folder too).'; },
+    function(e){ $('#setupStatus').textContent = 'Could not send: ' + mailErrText(e) + '.'; })
+    .then(function(){ btn.disabled = false; });
+});
+$('#setupDone').addEventListener('click', function(){ if (!isStandalone()) clearSetupHash(); $('#setupModal').classList.remove('show'); runMailQueue(); });
 
 })();
 </script>
