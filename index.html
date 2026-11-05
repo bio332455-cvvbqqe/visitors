@@ -147,6 +147,23 @@ button{font-family:inherit;cursor:pointer}
 .sig-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#626C7C;pointer-events:none}
 .sig-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .sig-who{font-size:16px;color:var(--text)}
+.sig-pad.sm{height:160px}
+.lab-staff .opt{font-weight:400;letter-spacing:0;text-transform:none}
+.lab-doc{border:2px solid var(--sky-lt);border-radius:18px;background:var(--white);padding:22px 22px 10px;margin:0 0 28px;font-size:16px;line-height:1.5;color:var(--text)}
+.lab-doc table{width:100%;border-collapse:collapse;margin:0 0 18px}
+.lab-doc th,.lab-doc td{border:1px solid var(--sky-lt);padding:8px 12px;text-align:left;vertical-align:top}
+.lab-doc th{background:var(--ice);color:var(--ink);font-weight:700}
+.lab-doc .lab-ctl th{background:var(--sky-lt);font-weight:400;font-size:14px;width:22%}
+.lab-doc .lab-ctl td{font-size:15px}
+.lab-doc .lab-ctl .t{color:var(--ink);font-weight:700}
+.lab-doc .lab-band{background:var(--ice);border-bottom:2px solid var(--sky);color:var(--ink);font-weight:700;font-size:17px;padding:8px 12px;margin:4px 0 12px}
+.lab-doc .lab-det td{color:var(--ink);font-weight:700;width:30%}
+.lab-doc .lab-det th{width:20%}
+.lab-doc .lab-confirm{color:var(--ink);font-weight:700;margin:0 0 10px}
+.lab-doc .lab-req th{width:28%}
+.lab-doc ul{margin:0;padding-left:18px}
+.lab-doc li{margin:0 0 6px}
+.lab-doc p{margin:0 0 16px}
 .fld .help{font-size:15px;color:var(--text);margin:8px 0 0}
 .btn-cam{min-height:50px;padding:0 20px;font-size:17px;gap:10px;margin-top:10px}
 .btn-cam svg{width:24px;height:24px;flex:none}
@@ -416,6 +433,39 @@ Bioscript Center.</h1>
   </div>
 </section>
 
+<!-- ================= LABORATORY VISITOR FORM (English only) ================= -->
+<section class="screen" id="lab" aria-label="Laboratory visitor form" lang="en" dir="ltr">
+  <header class="topbar">
+    <img class="lockup sm js-logo" alt="Bioscript by Qaly Health Shield">
+    <span class="spacer"></span>
+    <button class="btn btn-secondary btn-ghost" id="labBack">Back</button>
+  </header>
+  <div class="form-scroll" id="labScroll">
+    <div class="form-wrap">
+      <div class="f-head">
+        <h2 class="headline js-dot" data-src="Before you enter the laboratory."></h2>
+        <p class="lead">Please read this form and sign at the bottom. Your details are already filled in.</p>
+      </div>
+      <div class="lab-doc" id="labDoc"></div>
+      <div class="sig-box">
+        <span class="label">Visitor signature</span>
+        <p class="sig-note">By signing, you confirm the visitor acknowledgement above.</p>
+        <div class="sig-pad"><canvas id="labSigPad" aria-label="Visitor signature"></canvas><span class="sig-hint" id="labSigHint">Sign here with your finger</span></div>
+        <div class="sig-row"><span class="sig-who" id="labWho"></span><button type="button" class="link-btn" id="labSigClear">Clear</button></div>
+        <div class="err" id="errLabSig" role="alert"></div>
+      </div>
+      <div class="sig-box lab-staff">
+        <span class="label">For staff <span class="opt">(optional)</span></span>
+        <p class="sig-note">A staff member can write their name and sign here. If this is left empty, it can be signed by hand on the printed form.</p>
+        <input class="inp" id="labStaffName" type="text" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="80" placeholder="Staff name" aria-label="Staff name">
+        <div class="sig-pad sm"><canvas id="labStaffPad" aria-label="Staff signature"></canvas><span class="sig-hint" id="labStaffHint">Staff signature</span></div>
+        <div class="sig-row"><span class="sig-who"></span><button type="button" class="link-btn" id="labStaffClear">Clear</button></div>
+      </div>
+      <div class="submit-row"><button type="button" class="btn btn-primary btn-xl" id="labSignBtn">Sign and finish <span class="arrow">→</span></button></div>
+    </div>
+  </div>
+</section>
+
 <section class="screen" id="thanks" aria-label="Thank you">
   <header class="topbar"><img class="lockup sm js-logo" alt="Bioscript by Qaly Health Shield"></header>
   <div class="t-body">
@@ -497,7 +547,7 @@ Bioscript Center.</h1>
           <button class="btn btn-secondary" id="setupQrBtn">Set up another iPad</button>
         </div>
         <p class="help">Shows a code to scan with the other iPad's Camera. It turns emails on there in one step.</p>
-        <p class="help">Page version: 3 Nov 2026 (email 4). If an iPad shows an older date, close the page and open the link again.</p>
+        <p class="help">Page version: 5 Nov 2026 (lab form). If an iPad shows an older date, close the page and open the link again.</p>
       </div>
     </div>
   </details>
@@ -2378,7 +2428,7 @@ function setErr(el, msg, key){
 function startForm(l){
   lang = l || 'en';
   resetState();
-  busy = false; ndaSig = null; $('#submitBtn').disabled = false; $('#ndaSignBtn').disabled = false;
+  busy = false; ndaSig = null; labSig = labStaffSig = null; labStaffName = ''; $('#submitBtn').disabled = false; $('#ndaSignBtn').disabled = false; $('#labSignBtn').disabled = false; $('#labStaffName').value = '';
   $('#visitForm').reset(); setEidPhoto(null); updateTypeFields(); $('#fDept').value = ''; $('#fDept').classList.add('is-empty');
   ['#fName','#fMobile','#fEid','#fEmail','#fLicense','#fDept'].forEach(function(s){ $(s).removeAttribute('aria-invalid'); });
   $$('#form .err').forEach(function(e){ setErr(e, null); });
@@ -2478,8 +2528,8 @@ $('#visitForm').addEventListener('submit', function(e){
   if (state.host == null) bad(null, '#errHost', 'eHost');
   if (!$('#fConsent').checked) bad(null, '#errConsent', 'eConsent');
   if (first){
-    if (current === 'nda') show('form');
-    ndaSig = null;
+    if (current === 'nda' || current === 'lab') show('form');
+    ndaSig = null; labSig = labStaffSig = null;
     setErr($('#errSubmit'), L.eCheck, 'eCheck');
     var box = first.closest('.sec, .fld') || first;
     box.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
@@ -2494,30 +2544,37 @@ $('#visitForm').addEventListener('submit', function(e){
     host: host.en, hostAr: host.ar || '', lang: lang, consent: true, device: settings.ipadName
   };
   if (ndaNeeded() && !ndaSig){ openNda(rec); return; }
+  if (labNeeded() && !labSig){ openLab(rec, ndaNeeded()); return; }
   var sigBytes = ndaNeeded() ? ndaSig : null; ndaSig = null;
   if (sigBytes) rec.nda = {signed: true, at: now.toISOString(), doc: 'NDA - Bioscript'};
-  busy = true; $('#submitBtn').disabled = true; $('#ndaSignBtn').disabled = true;
+  var labBytes = labNeeded() ? labSig : null, staffBytes = labNeeded() ? labStaffSig : null;
+  if (labBytes) rec.lab = {signed: true, at: now.toISOString(), doc: LAB.ref, staffName: labStaffName || '', staffSig: !!staffBytes};
+  labSig = labStaffSig = null; labStaffName = '';
+  busy = true; $('#submitBtn').disabled = true; $('#ndaSignBtn').disabled = true; $('#labSignBtn').disabled = true;
   (eidPhoto ? withTimeout(photoDb.put(rec.id, eidPhoto.bytes), 8000) : Promise.resolve())
   .then(function(){ return sigBytes ? withTimeout(photoDb.put(rec.id + ':sig', sigBytes), 8000).catch(function(){ rec.nda.sig = bytesToDataUrl(sigBytes, 'image/png'); }) : null; })
+  .then(function(){ return labBytes ? withTimeout(photoDb.put(rec.id + ':lab', labBytes), 8000).catch(function(){ rec.lab.sig = bytesToDataUrl(labBytes, 'image/png'); }) : null; })
+  .then(function(){ return staffBytes ? withTimeout(photoDb.put(rec.id + ':labstaff', staffBytes), 8000).catch(function(){ rec.lab.ssig = bytesToDataUrl(staffBytes, 'image/png'); }) : null; })
   .then(function(){
   records.push(rec);
   if (!store.set('bsv.records', records)){
     records.pop(); if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){}); if (rec.nda) photoDb.del(rec.id + ':sig').catch(function(){});
-    setErr($('#errConsent'), L.eSave, 'eSave'); if (current === 'nda') setErr($('#errSig'), L.eSave, 'eSave');
+    if (rec.lab){ photoDb.del(rec.id + ':lab').catch(function(){}); photoDb.del(rec.id + ':labstaff').catch(function(){}); }
+    setErr($('#errConsent'), L.eSave, 'eSave'); if (current === 'nda') setErr($('#errSig'), L.eSave, 'eSave'); if (current === 'lab') setErr($('#errLabSig'), 'This iPad could not save the visit. Please tell reception.', null);
     return;
   }
-  setEidPhoto(null); sigPad.clear();
+  setEidPhoto(null); sigPad.clear(); labPad.clear(); staffPad.clear(); $('#labStaffName').value = '';
   document.activeElement && document.activeElement.blur && document.activeElement.blur();
   showThanks(rec);
   if (rec.nda && rec.email) queueMail(rec.id);
   }, function(err){
     if (err && err.sig){ if (rec.eidPhoto) photoDb.del(rec.id).catch(function(){}); if (current !== 'nda') show('nda'); setErr($('#errSig'), L.eSigSave, 'eSigSave'); return; }
-    if (current === 'nda') show('form');
+    if (current === 'nda' || current === 'lab') show('form');
     rec.eidPhoto = false; setEidPhoto(null);
     setErr($('#errEid'), L.ePhotoSave, 'ePhotoSave'); $('#fEid').setAttribute('aria-invalid', 'true');
     $('#fldEid').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
-  }).catch(function(err){ try { console.error(err); } catch(x){} setErr($('#errSubmit'), L.eSave || L.eCheck, 'eSave'); if (current === 'nda') setErr($('#errSig'), L.eSave || L.eCheck, 'eSave'); })
-  .then(function(){ busy = false; $('#submitBtn').disabled = false; $('#ndaSignBtn').disabled = false; });
+  }).catch(function(err){ try { console.error(err); } catch(x){} setErr($('#errSubmit'), L.eSave || L.eCheck, 'eSave'); if (current === 'nda') setErr($('#errSig'), L.eSave || L.eCheck, 'eSave'); if (current === 'lab') setErr($('#errLabSig'), 'This iPad could not save the visit. Please tell reception.', null); })
+  .then(function(){ busy = false; $('#submitBtn').disabled = false; $('#ndaSignBtn').disabled = false; $('#labSignBtn').disabled = false; });
 });
 
 /* ---------------- thank you ---------------- */
@@ -2680,6 +2737,223 @@ $('#ndaSignBtn').addEventListener('click', function(){
     $('#visitForm').dispatchEvent(new Event('submit', {cancelable: true}));
   }, function(){ setErr($('#errSig'), L.eSigSave, 'eSigSave'); });
 });
+
+
+/* =====================================================================
+   Laboratory visitor form (BSC/MG/L04/F0059), English only, word for word.
+   Asked when the visitor picks a "Who you are visiting" choice about the
+   laboratory. Filled from the sign-in details, signed by finger, kept in
+   the visitor's PDF on this iPad only (not emailed).
+   ===================================================================== */
+var LAB = {
+  ref: 'BSC/MG/L04/F0059', title: 'Visitors Awareness of Impartiality and Confidentiality Form', dept: 'MANAGEMENT', issue: '01', type: 'Form',
+  issued: '4/11/2026', next: '3/11/2027',
+  purpose: "To ensure all external visitors understand and follow the laboratory's confidentiality, privacy, impartiality, restricted access and safety requirements before entering controlled areas.",
+  confirm: 'By signing this form, I confirm that I understand and agree to the following requirements during and after my visit:',
+  sections: [
+    ['1. Confidentiality & Privacy', [
+      'I will keep confidential any patient identifiers, test results, genomic data, biological sample information, laboratory records, technical methods, commercial information and internal discussions seen or heard during my visit.',
+      'I will not copy, photograph, record, download, remove, reproduce, discuss or share confidential information unless specifically authorised by the laboratory.',
+      'My confidentiality obligation continues after the visit. Any accidental exposure or disclosure will be reported immediately to my host or the Quality team.']],
+    ['2. Impartiality & Non-Interference', [
+      'I will not influence or attempt to influence testing, interpretation, validation, reporting, quality investigations, complaints, purchasing or other laboratory decisions.',
+      'I will declare any actual or potential conflict of interest that could affect, or appear to affect, the impartiality of laboratory activities.']],
+    ['3. Restricted Access, Safety & Devices', [
+      'I will remain only in areas authorised for my visit and will follow escort, PPE, biosafety and laboratory instructions.',
+      'I will not touch samples, reagents, equipment, computers, records or laboratory systems unless specifically authorised and supervised.',
+      'Photography, audio/video recording, removable media and capture of screens, documents or patient information are prohibited unless prior written authorisation is provided.']],
+    ['4. Data Protection & Information Security', [
+      'I will not access patient or genomic information unless it is necessary for the authorised purpose of my visit and access has been approved.',
+      "I will follow applicable UAE law, DHA health-information privacy/security requirements and the laboratory's confidentiality and information-security policies."]]
+  ],
+  ack: 'I confirm that I have read and understood the requirements above and agree to comply with them. I understand that failure to comply may result in termination of the visit, withdrawal of access and further action in accordance with laboratory policy and applicable requirements.',
+  note: "Internal note: This acknowledgement supports the laboratory quality system and visitor-control process. Final controlled release should be approved by the Quality function and Laboratory/Medical Director and aligned with the facility's current DHA-approved policies and procedures."
+};
+function isLabHost(h){ return !!h && /\blab|laborator|مختبر/i.test((h.en || '') + ' ' + (h.ar || '')); }
+function labNeeded(){ return !!(state && state.host != null && isLabHost(settings.hosts[state.host])); }
+function labDetails(r){
+  var d = new Date(r.ts);
+  return [['Visitor Name', r.name], ['Organization', r.company || '–'], ['Contact No.', r.mobile], ['Email', r.email || '–'],
+    ['Purpose', typeLabel(r.type) + (r.host ? ' · ' + r.host : '')], ['Visit Date / Time', fDate(d) + ', ' + fTime(d)]];
+}
+function renderLab(r){
+  var det = labDetails(r), rows = '';
+  for (var i = 0; i < det.length; i += 2) rows += '<tr><th>' + esc(det[i][0]) + '</th><td dir="auto">' + esc(det[i][1]) + '</td><th>' + esc(det[i+1][0]) + '</th><td dir="auto">' + esc(det[i+1][1]) + '</td></tr>';
+  $('#labDoc').innerHTML =
+    '<table class="lab-ctl"><tr><th>Document Title</th><td colspan="3" class="t">' + esc(LAB.title) + '</td></tr>' +
+    '<tr><th>Department / Section</th><td>' + LAB.dept + '</td><th>Issue #</th><td>' + LAB.issue + '</td></tr>' +
+    '<tr><th>Document Type</th><td>' + LAB.type + '</td><th>Reference #</th><td>' + LAB.ref + '</td></tr>' +
+    '<tr><th>Issue Date</th><td>' + LAB.issued + '</td><th>Next Revision Due</th><td>' + LAB.next + '</td></tr></table>' +
+    '<div class="lab-band">PURPOSE</div><p>' + esc(LAB.purpose) + '</p>' +
+    '<div class="lab-band">VISITOR DETAILS</div><table class="lab-det">' + rows + '</table>' +
+    '<p class="lab-confirm">' + esc(LAB.confirm) + '</p>' +
+    '<table class="lab-req">' + LAB.sections.map(function(sc){ return '<tr><th>' + esc(sc[0]) + '</th><td><ul>' + sc[1].map(function(b){ return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></td></tr>'; }).join('') + '</table>' +
+    '<div class="lab-band">VISITOR ACKNOWLEDGEMENT</div><p>' + esc(LAB.ack) + '</p>';
+}
+function makePad(cv, hint, onStart){
+  var ctx = cv.getContext('2d'), strokes = [], cur = null, len = 0, down = false;
+  function rect(){ return cv.getBoundingClientRect(); }
+  function pen(c, w){ c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#021A91'; c.lineWidth = w; }
+  function paint(c, W, H, w){
+    pen(c, w);
+    strokes.forEach(function(st){
+      c.beginPath();
+      st.forEach(function(p, i){ var x = p.x * W, y = p.y * H; if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+      if (st.length === 1) c.lineTo(st[0].x * W + .5, st[0].y * H);
+      c.stroke();
+    });
+  }
+  function redraw(){ var r = rect(); ctx.clearRect(0, 0, r.width, r.height); paint(ctx, r.width, r.height, 2.6); hint.hidden = strokes.length > 0; }
+  function size(){ var r = rect(), dpr = Math.max(1, window.devicePixelRatio || 1); if (!r.width) return; cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); redraw(); }
+  function at(e){ var r = rect(); return {x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))}; }
+  cv.addEventListener('pointerdown', function(e){ e.preventDefault(); down = true; try { cv.setPointerCapture(e.pointerId); } catch(x){} cur = [at(e)]; strokes.push(cur); redraw(); if (onStart) onStart(); });
+  cv.addEventListener('pointermove', function(e){
+    if (!down) return; e.preventDefault();
+    var r = rect(), p = at(e), q = cur[cur.length - 1];
+    len += Math.hypot((p.x - q.x) * r.width, (p.y - q.y) * r.height); cur.push(p);
+    pen(ctx, 2.6); ctx.beginPath(); ctx.moveTo(q.x * r.width, q.y * r.height); ctx.lineTo(p.x * r.width, p.y * r.height); ctx.stroke();
+  });
+  ['pointerup', 'pointercancel'].forEach(function(ev){ cv.addEventListener(ev, function(){ down = false; }); });
+  return {
+    size: size,
+    clear: function(){ strokes = []; len = 0; cur = null; redraw(); },
+    signed: function(){ return strokes.length > 0 && len >= 40; },
+    empty: function(){ return strokes.length === 0; },
+    png: function(){
+      var r = rect(), W = 900, H = Math.max(150, Math.round(W * (r.height || 220) / (r.width || 900))), c = document.createElement('canvas');
+      c.width = W; c.height = H; paint(c.getContext('2d'), W, H, 4.5);
+      return new Promise(function(res, rej){
+        if (c.toBlob) c.toBlob(function(b){ if (!b) return rej(new Error('png')); var fr = new FileReader(); fr.onload = function(){ res(new Uint8Array(fr.result)); }; fr.onerror = rej; fr.readAsArrayBuffer(b); }, 'image/png');
+        else { var s2 = atob(c.toDataURL('image/png').split(',')[1]), u = new Uint8Array(s2.length); for (var i=0;i<s2.length;i++) u[i] = s2.charCodeAt(i); res(u); }
+      });
+    }
+  };
+}
+var labPad = makePad($('#labSigPad'), $('#labSigHint'), function(){ setErr($('#errLabSig'), null); });
+var staffPad = makePad($('#labStaffPad'), $('#labStaffHint'));
+window.addEventListener('resize', function(){ if (current === 'lab'){ labPad.size(); staffPad.size(); } });
+var labSig = null, labStaffSig = null, labStaffName = '', labFromNda = false;
+function openLab(rec, fromNda){
+  labFromNda = !!fromNda;
+  renderLab(rec);
+  labPad.clear(); staffPad.clear(); setErr($('#errLabSig'), null);
+  $('#labWho').textContent = bidiIso(rec.name) + '  ·  ' + fDate(new Date());
+  show('lab'); $('#labScroll').scrollTop = 0;
+  requestAnimationFrame(function(){ labPad.size(); staffPad.size(); });
+  armIdle();
+}
+$('#labBack').addEventListener('click', function(){
+  labSig = labStaffSig = null;
+  if (labFromNda){ ndaSig = null; show('nda'); requestAnimationFrame(function(){ sigPad.size(); }); }
+  else show('form');
+  armIdle();
+});
+$('#labSigClear').addEventListener('click', function(){ labPad.clear(); });
+$('#labStaffClear').addEventListener('click', function(){ staffPad.clear(); });
+$('#labSignBtn').addEventListener('click', function(){
+  if (busy) return;
+  if (!labPad.signed()){ setErr($('#errLabSig'), 'Please sign in the box above.', null); $('#labSigPad').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block: 'center'}); return; }
+  setErr($('#errLabSig'), null);
+  var staffName = $('#labStaffName').value.replace(/\s+/g, ' ').trim().slice(0, 80);
+  Promise.all([labPad.png(), staffPad.empty() ? Promise.resolve(null) : staffPad.png()]).then(function(a){
+    labSig = a[0]; labStaffSig = a[1]; labStaffName = staffName;
+    $('#visitForm').dispatchEvent(new Event('submit', {cancelable: true}));
+  }, function(){ setErr($('#errLabSig'), 'The signature could not be saved. Please try again.', null); });
+});
+function loadStoredImg(key, dataUrl){
+  if (dataUrl) return loadImg(dataUrl).catch(function(){ return null; });
+  return photoDb.get(key).then(function(b){
+    if (!b) return null;
+    var url = URL.createObjectURL(new Blob([b], {type: 'image/png'}));
+    return loadImg(url).then(function(img){ return img; }, function(){ return null; }).then(function(img){ setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){} }, 2000); return img; });
+  }).catch(function(){ return null; });
+}
+function loadLabSigs(r){
+  if (!r || !r.lab) return Promise.resolve([null, null]);
+  return Promise.all([loadStoredImg(r.id + ':lab', r.lab.sig), r.lab.staffSig ? loadStoredImg(r.id + ':labstaff', r.lab.ssig) : Promise.resolve(null)]);
+}
+/* --- the two form pages in the visitor PDF, laid out like the printed form --- */
+function labCell(ctx, x, y, w, h, fill){ if (fill){ ctx.fillStyle = fill; ctx.fillRect(x, y, w, h); } ctx.strokeStyle = '#B9DAF1'; ctx.lineWidth = .8; ctx.strokeRect(x, y, w, h); }
+function labCtl(ctx, logo, W){
+  var x = 36, y = 30, w = W - 72, c3 = [172, 179, 172], h1 = 46, rh = 21;
+  labCell(ctx, x, y, c3[0], h1); labCell(ctx, x + c3[0], y, c3[1], h1); labCell(ctx, x + c3[0] + c3[1], y, c3[2], h1);
+  txt(ctx, 'Bioscript Center', x + c3[0] / 2, y + 28, {size: 12, weight: 700, color: '#021A91', align: 'center'});
+  var lh = 30, lw = lh * logo.naturalWidth / logo.naturalHeight; if (lw > c3[1] - 20){ lw = c3[1] - 20; lh = lw * logo.naturalHeight / logo.naturalWidth; }
+  ctx.drawImage(logo, x + c3[0] + (c3[1] - lw) / 2, y + (h1 - lh) / 2, lw, lh);
+  arText(ctx, 'بايوسكريبت سنتر', x + c3[0] + c3[1] + c3[2] / 2 + 40, y + 28, 12, 700, '#021A91');
+  var rows = [[['Document Title', LAB.title, true]], [['Department / Section', LAB.dept], ['Issue #', LAB.issue]], [['Document Type', LAB.type], ['Reference #', LAB.ref]], [['Issue Date', LAB.issued], ['Next Revision Due', LAB.next]]];
+  var ly = y + h1, lab = 102, val1 = 180, lab2 = 93, val2 = w - lab - val1 - lab2;
+  rows.forEach(function(r){
+    labCell(ctx, x, ly, lab, rh, '#B9DAF1'); txt(ctx, r[0][0], x + 6, ly + 14, {size: 7.6, color: '#021A91'});
+    if (r[0][2]){ labCell(ctx, x + lab, ly, w - lab, rh); txt(ctx, r[0][1], x + lab + 6, ly + 14.5, {size: 9, weight: 700, color: '#021A91', max: w - lab - 12}); }
+    else {
+      labCell(ctx, x + lab, ly, val1, rh); txt(ctx, r[0][1], x + lab + 6, ly + 14.5, {size: 8.6, color: '#333A48'});
+      labCell(ctx, x + lab + val1, ly, lab2, rh, '#B9DAF1'); txt(ctx, r[1][0], x + lab + val1 + 6, ly + 14, {size: 7.6, color: '#021A91'});
+      labCell(ctx, x + lab + val1 + lab2, ly, val2, rh); txt(ctx, r[1][1], x + lab + val1 + lab2 + 6, ly + 14.5, {size: 8.6, color: '#333A48'});
+    }
+    ly += rh;
+  });
+  return ly;
+}
+function labBand(ctx, s, y, W){ ctx.fillStyle = '#E8F4FC'; ctx.fillRect(36, y, W - 72, 22); ctx.fillStyle = '#71B5E2'; ctx.fillRect(36, y + 22, W - 72, 1.2); txt(ctx, s, 44, y + 15.5, {size: 10, weight: 700, color: '#021A91'}); return y + 30; }
+function labPara(ctx, s, x, y, w, size, lh, o){ font(ctx, size, (o && o.weight) || 400); ctx.fillStyle = (o && o.color) || '#333A48'; ctx.textAlign = 'left'; var ls = wrap(ctx, s, w); ls.forEach(function(l, i){ ctx.fillText(l, x, y + i * lh); }); return y + ls.length * lh; }
+function labPages(cv, W, H, r, logo, sig, ssig, start, total){
+  if (!r || !r.lab) return Promise.resolve([]);
+  var out = [];
+  // page 1: purpose, visitor details, requirements
+  var ctx = page(cv, W, H), y = labCtl(ctx, logo, W) + 12;
+  y = labBand(ctx, 'PURPOSE', y, W);
+  y = labPara(ctx, LAB.purpose, 52, y + 10, W - 104, 9, 13.5) + 6;
+  y = labBand(ctx, 'VISITOR DETAILS', y, W) + 4;
+  var det = labDetails(r), cw = [84, 178, 84, 177];
+  for (var i = 0; i < det.length; i += 2){
+    var x = 36;
+    [det[i][0], det[i][1], det[i+1][0], det[i+1][1]].forEach(function(v, ci){
+      labCell(ctx, x, y, cw[ci], 22, ci % 2 ? null : '#E8F4FC');
+      txt(ctx, v, x + 6, y + 14.5, {size: ci % 2 ? 8.6 : 8, weight: 700, color: '#021A91', max: cw[ci] - 10});
+      x += cw[ci];
+    });
+    y += 22;
+  }
+  y = labPara(ctx, LAB.confirm, 36, y + 16, W - 72, 9, 13, {weight: 700, color: '#021A91'}) + 4;
+  LAB.sections.forEach(function(sc){
+    font(ctx, 8.2, 400); var bl = [];
+    sc[1].forEach(function(b){ wrap(ctx, '• ' + b, 400).forEach(function(l){ bl.push(l); }); });
+    font(ctx, 8.4, 700); var hl = wrap(ctx, sc[0], 98);
+    var h = Math.max(bl.length * 12.2, hl.length * 12.2) + 12;
+    labCell(ctx, 36, y, 112, h, '#E8F4FC'); labCell(ctx, 148, y, W - 72 - 112, h);
+    font(ctx, 8.4, 700); ctx.fillStyle = '#021A91'; ctx.textAlign = 'left';
+    hl.forEach(function(l, k){ ctx.fillText(l, 44, y + (h - hl.length * 12.2) / 2 + 9 + k * 12.2); });
+    font(ctx, 8.2, 400); ctx.fillStyle = '#333A48';
+    bl.forEach(function(l, k){ ctx.fillText(l, 156, y + 15 + k * 12.2); });
+    y += h;
+  });
+  footer(ctx, W, H, start, total);
+  return toJpeg(cv).then(function(j){
+    out.push(j);
+    // page 2: acknowledgement and signatures
+    var c2 = page(cv, W, H), y2 = labCtl(c2, logo, W) + 12, d = new Date(r.lab.at);
+    y2 = labBand(c2, 'VISITOR ACKNOWLEDGEMENT', y2, W);
+    y2 = labPara(c2, LAB.ack, 36, y2 + 10, W - 72, 9, 13.5) + 10;
+    var cw2 = [84, 178, 84, 177], rh1 = 74, rh2 = 60, x0 = 36;
+    function sigImg(img, x, yy, w, h){ if (!img) return; var k = Math.min((w - 12) / img.naturalWidth, (h - 10) / img.naturalHeight); c2.drawImage(img, x + 6, yy + (h - img.naturalHeight * k) / 2, img.naturalWidth * k, img.naturalHeight * k); }
+    labCell(c2, x0, y2, cw2[0], rh1, '#E8F4FC'); txt(c2, 'Visitor Signature', x0 + 6, y2 + 16, {size: 8, weight: 700, color: '#021A91'});
+    labCell(c2, x0 + cw2[0], y2, cw2[1], rh1); sigImg(sig, x0 + cw2[0], y2, cw2[1], rh1);
+    labCell(c2, x0 + cw2[0] + cw2[1], y2, cw2[2], rh1, '#E8F4FC'); txt(c2, 'Date / Time', x0 + cw2[0] + cw2[1] + 6, y2 + 16, {size: 8, weight: 700, color: '#021A91'});
+    labCell(c2, x0 + cw2[0] + cw2[1] + cw2[2], y2, cw2[3], rh1); txt(c2, fDate(d) + ', ' + fTime(d), x0 + cw2[0] + cw2[1] + cw2[2] + 6, y2 + 16, {size: 8.6, weight: 700, color: '#021A91'});
+    y2 += rh1;
+    labCell(c2, x0, y2, cw2[0], rh2, '#E8F4FC'); txt(c2, 'Staff Name', x0 + 6, y2 + 16, {size: 8, weight: 700, color: '#021A91'});
+    labCell(c2, x0 + cw2[0], y2, cw2[1], rh2); if (r.lab.staffName) txt(c2, r.lab.staffName, x0 + cw2[0] + 6, y2 + 16, {size: 8.6, weight: 700, color: '#021A91', max: cw2[1] - 12});
+    labCell(c2, x0 + cw2[0] + cw2[1], y2, cw2[2], rh2, '#E8F4FC'); txt(c2, 'Signature', x0 + cw2[0] + cw2[1] + 6, y2 + 16, {size: 8, weight: 700, color: '#021A91'});
+    labCell(c2, x0 + cw2[0] + cw2[1] + cw2[2], y2, cw2[3], rh2); sigImg(ssig, x0 + cw2[0] + cw2[1] + cw2[2], y2, cw2[3], rh2);
+    y2 += rh2;
+    c2.font = 'italic 400 6.8px ' + PDF_FONT; c2.fillStyle = '#626C7C'; c2.textAlign = 'center';
+    wrap(c2, LAB.note, W - 140).forEach(function(l, k){ c2.fillText(l, W / 2, y2 + 12 + k * 9.5); });
+    txt(c2, 'Signed electronically on ' + (r.device || settings.ipadName) + ' on ' + fDate(d) + ' at ' + fTime(d) + '.  Reference ' + r.ref + '.', 36, y2 + 50, {size: 7.6, color: '#626C7C', max: W - 72});
+    footer(c2, W, H, start + 1, total);
+    return toJpeg(cv).then(function(j2){ out.push(j2); return out; });
+  });
+}
 
 /* ---------------- NDA pages in the visitor PDF ---------------- */
 function bytesToDataUrl(u, type){ var s = ''; for (var i=0;i<u.length;i+=8192) s += String.fromCharCode.apply(null, u.subarray(i, i + 8192)); return 'data:' + type + ';base64,' + btoa(s); }
@@ -2900,11 +3174,11 @@ function clearTimers(){
 }
 function armIdle(){
   clearTimeout(idleTimer);
-  if (current !== 'form' && current !== 'nda') return;
+  if (current !== 'form' && current !== 'nda' && current !== 'lab') return;
   idleTimer = setTimeout(function(){
     idleLeft = 20; $('#idleModal').classList.add('show'); tickIdle();
     idleCount = setInterval(tickIdle, 1000);
-  }, current === 'nda' ? 180000 : 90000);
+  }, current === 'nda' || current === 'lab' ? 180000 : 90000);
 }
 function tickIdle(){
   $('#idleText').textContent = fill(T[lang].idleText, {n: idleLeft});
@@ -2914,12 +3188,13 @@ $('#idleStay').addEventListener('click', function(){ clearInterval(idleCount); $
 $('#idleReset').addEventListener('click', function(){ goWelcome(); });
 ['pointerdown','keydown','input'].forEach(function(ev){
   document.addEventListener(ev, function(){
-    if ((current === 'form' || current === 'nda') && !$('#idleModal').classList.contains('show')) armIdle();
+    if ((current === 'form' || current === 'nda' || current === 'lab') && !$('#idleModal').classList.contains('show')) armIdle();
     if (current === 'staff' || current === 'pin') armStaff();
   }, true);
 });
 function goWelcome(){
   ndaSig = null; try { sigPad.clear(); } catch(e){}
+  labSig = labStaffSig = null; labStaffName = ''; try { labPad.clear(); staffPad.clear(); $('#labStaffName').value = ''; } catch(e){}
   $('#visitForm').reset(); resetState();
   $$('.modal').forEach(function(m){ m.classList.remove('show'); });
   show('welcome');
@@ -3036,7 +3311,7 @@ function renderStaff(){
     list.map(function(r){
       var d = new Date(r.ts);
       return '<tr><td class="nw"><div>' + fDate(d) + '</div><div class="s">' + fTime(d) + '</div></td>' +
-        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + (r.nda ? '<div class="s">NDA signed</div>' : '') + (mailState(r) ? '<div class="s">' + esc(mailState(r)) + '</div>' : '') + '</td>' +
+        '<td><div class="n">' + esc(r.name) + '</div>' + (r.email ? '<div class="s">' + esc(r.email) + '</div>' : '') + (r.eidPhoto ? '<div class="s">ID photo saved</div>' : '') + (r.nda ? '<div class="s">NDA signed</div>' : '') + (r.lab ? '<div class="s">Lab form signed</div>' : '') + (mailState(r) ? '<div class="s">' + esc(mailState(r)) + '</div>' : '') + '</td>' +
         '<td class="nw" dir="ltr">' + esc(r.mobile) + '</td><td class="hide-sm">' + esc(r.company || '–') + (r.license ? '<div class="s">Trade license ' + esc(r.license) + '</div>' : '') + '</td>' +
         '<td>' + esc(typeLabel(r.type)) + '</td><td>' + esc(r.dept ? deptLabel(r.dept) : '–') + '</td><td class="hide-sm">' + esc(r.host) + '</td>' +
         '<td class="nw"><button class="btn btn-secondary pdf" data-id="' + esc(r.id) + '">PDF</button>' + (mailReady() && r.nda && r.email ? ' <button class="btn btn-secondary pdf mail" data-id="' + esc(r.id) + '" title="Email the signed NDA again">Email</button>' : '') + '</td></tr>';
@@ -3256,7 +3531,7 @@ function idPage(cv, W, H, r, logo, photo, total, pageNo){
 }
 function makeRecordPdf(r){
   var W = 595, H = 842, cv = document.createElement('canvas'), d = new Date(r.ts);
-  return Promise.all([loadImg(LOGO_SRC), loadIdPhoto(r), loadSig(r)]).then(function(a){ var logo = a[0], photo = a[1], sig = a[2], plan = ndaPlan(cv, r), total = 1 + (photo ? 1 : 0) + (plan ? plan.pages.length : 0);
+  return Promise.all([loadImg(LOGO_SRC), loadIdPhoto(r), loadSig(r), loadLabSigs(r)]).then(function(a){ var logo = a[0], photo = a[1], sig = a[2], labS = a[3], plan = ndaPlan(cv, r), total = 1 + (photo ? 1 : 0) + (plan ? plan.pages.length : 0) + (r.lab ? 2 : 0);
     var ctx = page(cv, W, H);
     header(ctx, logo, W);
     title(ctx, 'Visitor record', 36, 124, 24);
@@ -3268,7 +3543,8 @@ function makeRecordPdf(r){
       ['Email', r.email || '–'], ['Company or organisation', r.company || '–'], ['Trade license', r.license || '–'], ['Address', r.address || '–'],
       ['Reason for visit', typeLabel(r.type)], ['Department', r.dept ? deptLabel(r.dept) : '–'], ['Visiting', r.host],
       ['Form language', r.lang === 'ar' ? 'Arabic' : 'English'], ['iPad', r.device || settings.ipadName],
-      ['NDA', r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (attached)' : 'Not required']
+      ['NDA', r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (attached)' : 'Not required'],
+      ['Laboratory visitor form', r.lab ? 'Signed ' + fDate(new Date(r.lab.at)) + ', ' + fTime(new Date(r.lab.at)) + ' (attached)' : 'Not required']
     ];
     var y = 186, STEP = fields.length > 13 ? 44 : 50;
     fields.forEach(function(f, i){
@@ -3298,7 +3574,7 @@ function makeRecordPdf(r){
       ctx.restore();
     }
     footer(ctx, W, H, 1, total);
-    return toJpeg(cv).then(function(j){ return idPage(cv, W, H, r, logo, photo, total).then(function(j2){ return ndaPages(cv, W, H, r, logo, sig, plan, j2 ? 3 : 2, total).then(function(nj){ var px = [cv.width, cv.height]; cv.width = cv.height = 0; return buildPdf([j].concat(j2 ? [j2] : [], nj), px[0], px[1], W, H, 'Visitor record ' + r.ref); }); }); });
+    return toJpeg(cv).then(function(j){ return idPage(cv, W, H, r, logo, photo, total).then(function(j2){ return ndaPages(cv, W, H, r, logo, sig, plan, j2 ? 3 : 2, total).then(function(nj){ return labPages(cv, W, H, r, logo, labS[0], labS[1], (j2 ? 3 : 2) + nj.length, total).then(function(lj){ var px = [cv.width, cv.height]; cv.width = cv.height = 0; return buildPdf([j].concat(j2 ? [j2] : [], nj, lj), px[0], px[1], W, H, 'Visitor record ' + r.ref); }); }); }); });
   });
 }
 function buildPdf(jpegs, pxW, pxH, W, H, titleText){
@@ -3383,7 +3659,7 @@ function makeXlsx(list, period){
   var cols = [
     {h:'Date', w:14}, {h:'Time', w:9}, {h:'Full name', w:26}, {h:'Mobile number', w:18}, {h:'Emirates ID', w:21}, {h:'ID photo', w:16},
     {h:'Email', w:30}, {h:'Company or organisation', w:27}, {h:'Trade license', w:18}, {h:'Address', w:30}, {h:'Reason for visit', w:23}, {h:'Department', w:18}, {h:'Visiting', w:26},
-    {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'NDA', w:28}, {h:'NDA email', w:24}, {h:'Reference', w:13}
+    {h:'Form language', w:15}, {h:'iPad', w:19}, {h:'Privacy consent', w:17}, {h:'NDA', w:28}, {h:'NDA email', w:24}, {h:'Lab form', w:28}, {h:'Reference', w:13}
   ];
   function cn(i){ return String.fromCharCode(65 + i); }
   var LAST = cn(cols.length - 1), lastRow = HEAD + Math.max(list.length, 1);
@@ -3404,7 +3680,7 @@ function makeXlsx(list, period){
     var cells = [
       [serial(d), 6, 1], [(d.getHours() * 60 + d.getMinutes()) / 1440, 8, 1], [r.name, 7], [r.mobile, 5], [r.eid, 5],
       [r.eidPhoto ? 'Yes (in visitor PDF)' : 'No', 5], [r.email, 5], [r.company, 5], [r.license, 5], [r.address, 5], [typeLabel(r.type), 5], [r.dept ? deptLabel(r.dept) : '', 5], [r.host, 5],
-      [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (in visitor PDF)' : 'Not required', 5], [r.mail && r.mail.sent ? 'Sent ' + fDate(new Date(r.mail.sent)) + ', ' + fTime(new Date(r.mail.sent)) : (r.mail && r.mail.waiting ? 'Waiting to send' : ''), 5], [r.ref, 5]
+      [r.lang === 'ar' ? 'Arabic' : 'English', 5], [r.device || settings.ipadName, 5], [r.consent === false ? 'No' : 'Yes', 5], [r.nda ? 'Signed ' + fDate(new Date(r.nda.at)) + ', ' + fTime(new Date(r.nda.at)) + ' (in visitor PDF)' : 'Not required', 5], [r.mail && r.mail.sent ? 'Sent ' + fDate(new Date(r.mail.sent)) + ', ' + fTime(new Date(r.mail.sent)) : (r.mail && r.mail.waiting ? 'Waiting to send' : ''), 5], [r.lab ? 'Signed ' + fDate(new Date(r.lab.at)) + ', ' + fTime(new Date(r.lab.at)) + (r.lab.staffName ? ' · staff: ' + r.lab.staffName : '') : 'Not required', 5], [r.ref, 5]
     ];
     rows.push('<row r="' + n + '" ht="24" customHeight="1">' + cells.map(function(c, ci){ return c[2] ? num(cn(ci) + n, c[0], c[1]) : str(cn(ci) + n, c[0], c[1]); }).join('') + '</row>');
   });
@@ -3501,7 +3777,7 @@ resetState();
 show('welcome');
 
 /* ---------------- one-step email setup for another iPad ---------------- */
-var PAGE_VER = '3nov-e4';
+var PAGE_VER = '5nov-lab';
 var FLOW_RE = /^https:\/\/[^\/?#\s]+\.powerplatform\.com(:443)?\/\S*[?&]sig=\S+$/;
 function isStandalone(){ try { return navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches); } catch(e){ return false; } }
 function setupLink(){ return location.origin + location.pathname + '?v=' + PAGE_VER + '&setup=' + encodeURIComponent(settings.mailUrl); }
