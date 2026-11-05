@@ -547,7 +547,7 @@ Bioscript Center.</h1>
           <button class="btn btn-secondary" id="setupQrBtn">Set up another iPad</button>
         </div>
         <p class="help">Shows a code to scan with the other iPad's Camera. It turns emails on there in one step.</p>
-        <p class="help">Page version: 5 Nov 2026 (lab form). If an iPad shows an older date, close the page and open the link again.</p>
+        <p class="help">Page version: 5 Nov 2026 (lab dept). If an iPad shows an older date, close the page and open the link again.</p>
       </div>
     </div>
   </details>
@@ -1973,7 +1973,8 @@ var DEPTS = [
   {k:'marketing', en:'Marketing',      ar:'التسويق'},
   {k:'support',   en:'Client Support', ar:'دعم العملاء'},
   {k:'finance',   en:'Finance',        ar:'المالية'},
-  {k:'dg',        en:'DG Office',      ar:'مكتب المدير العام'}
+  {k:'dg',        en:'DG Office',      ar:'مكتب المدير العام'},
+  {k:'lab',       en:'Lab',            ar:'المختبر'}
 ];
 function deptLabel(k, l){ for (var i=0;i<DEPTS.length;i++) if (DEPTS[i].k === k) return DEPTS[i][l||'en']; return k || ''; }
 function renderDept(){
@@ -2770,11 +2771,11 @@ var LAB = {
   note: "Internal note: This acknowledgement supports the laboratory quality system and visitor-control process. Final controlled release should be approved by the Quality function and Laboratory/Medical Director and aligned with the facility's current DHA-approved policies and procedures."
 };
 function isLabHost(h){ return !!h && /\blab|laborator|مختبر/i.test((h.en || '') + ' ' + (h.ar || '')); }
-function labNeeded(){ return !!(state && state.host != null && isLabHost(settings.hosts[state.host])); }
+function labNeeded(){ return !!state && (($('#fDept') && $('#fDept').value === 'lab') || (state.host != null && isLabHost(settings.hosts[state.host]))); }
 function labDetails(r){
   var d = new Date(r.ts);
   return [['Visitor Name', r.name], ['Organization', r.company || '–'], ['Contact No.', r.mobile], ['Email', r.email || '–'],
-    ['Purpose', typeLabel(r.type) + (r.host ? ' · ' + r.host : '')], ['Visit Date / Time', fDate(d) + ', ' + fTime(d)]];
+    ['Purpose', [typeLabel(r.type), r.dept === 'lab' ? 'Lab' : '', r.host && r.host !== 'Not sure' && !(r.dept === 'lab' && isLabHost({en: r.host})) ? r.host : ''].filter(Boolean).join(' · ')], ['Visit Date / Time', fDate(d) + ', ' + fTime(d)]];
 }
 function renderLab(r){
   var det = labDetails(r), rows = '';
@@ -2907,13 +2908,17 @@ function labPages(cv, W, H, r, logo, sig, ssig, start, total){
   y = labBand(ctx, 'VISITOR DETAILS', y, W) + 4;
   var det = labDetails(r), cw = [84, 178, 84, 177];
   for (var i = 0; i < det.length; i += 2){
-    var x = 36;
-    [det[i][0], det[i][1], det[i+1][0], det[i+1][1]].forEach(function(v, ci){
-      labCell(ctx, x, y, cw[ci], 22, ci % 2 ? null : '#E8F4FC');
-      txt(ctx, v, x + 6, y + 14.5, {size: ci % 2 ? 8.6 : 8, weight: 700, color: '#021A91', max: cw[ci] - 10});
+    var x = 36, cells = [det[i][0], det[i][1], det[i+1][0], det[i+1][1]];
+    font(ctx, 8.6, 700);
+    var wl = cells.map(function(v, ci){ return ci % 2 ? wrap(ctx, String(v), cw[ci] - 12).slice(0, 2) : [String(v)]; });
+    var rh = Math.max(22, Math.max(wl[1].length, wl[3].length) * 11 + 11);
+    cells.forEach(function(v, ci){
+      labCell(ctx, x, y, cw[ci], rh, ci % 2 ? null : '#E8F4FC');
+      if (ci % 2) wl[ci].forEach(function(l, k){ txt(ctx, l, x + 6, y + 14.5 + k * 11, {size: 8.6, weight: 700, color: '#021A91', max: cw[ci] - 10}); });
+      else txt(ctx, v, x + 6, y + 14.5, {size: 8, weight: 700, color: '#021A91', max: cw[ci] - 10});
       x += cw[ci];
     });
-    y += 22;
+    y += rh;
   }
   y = labPara(ctx, LAB.confirm, 36, y + 16, W - 72, 9, 13, {weight: 700, color: '#021A91'}) + 4;
   LAB.sections.forEach(function(sc){
@@ -3777,7 +3782,7 @@ resetState();
 show('welcome');
 
 /* ---------------- one-step email setup for another iPad ---------------- */
-var PAGE_VER = '5nov-lab';
+var PAGE_VER = '5nov-lab2';
 var FLOW_RE = /^https:\/\/[^\/?#\s]+\.powerplatform\.com(:443)?\/\S*[?&]sig=\S+$/;
 function isStandalone(){ try { return navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches); } catch(e){ return false; } }
 function setupLink(){ return location.origin + location.pathname + '?v=' + PAGE_VER + '&setup=' + encodeURIComponent(settings.mailUrl); }
